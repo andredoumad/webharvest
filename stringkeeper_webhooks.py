@@ -7,6 +7,7 @@ class WebHarvestWorker:
     def __init__(self, name):
         self.name = name
         self.api_url = 'https://stringkeeper.com/webhooks/webharvest/'
+        # self.api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
         self.user = ''
         self.chat = ''
         self.response = None
