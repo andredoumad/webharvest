@@ -38,8 +38,6 @@ class WebHarvestWorker:
             'chat_message': str(message)
         })
 
-
-
 worker = WebHarvestWorker('Alice')
 print(worker.name)
 
