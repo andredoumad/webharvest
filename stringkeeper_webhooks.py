@@ -1,6 +1,6 @@
 import json
 import requests
-
+from datetime import datetime
 
 class WebHarvestWorker:
 
@@ -39,6 +39,8 @@ worker = WebHarvestWorker('Alice')
 print(worker.name)
 
 worker.initialize()
-worker.chat_message(str('My name is ' + str(worker.name) + '.'))
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+worker.chat_message(str('My name is ' + str(worker.name) + '. The time is: ' + dt_string + '.'))
 print('response: ' + str(worker.response))
 print('response json: ' + str(worker.response.json()))
