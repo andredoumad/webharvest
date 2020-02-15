@@ -10,8 +10,8 @@ class WebHarvestWorker:
 
     def __init__(self, name):
         self.name = name
-        self.api_url = 'https://stringkeeper.com/webhooks/webharvest/'
-        # self.api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
+        # self.api_url = 'https://stringkeeper.com/webhooks/webharvest/'
+        self.api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
         self.user = ''
         self.chat = ''
         self.response = None
@@ -50,6 +50,17 @@ print('response json: ' + str(worker.response.json()))
 
 
 
+
+# TEST START
+
+
+
+# TEST END 
+
+
+
+# NOT WORKING START
+
 # async def command_receiver():
 #     async with websockets.connect('ws://127.0.0.1:80/webharvest/') as websocket:
 #         while True:
@@ -65,3 +76,6 @@ print('response json: ' + str(worker.response.json()))
 
 # # asyncio.get_event_loop().run_until_complete(command_receiver())
 # asyncio.get_event_loop().run_until_complete(command_receiver())
+
+
+# NOT WORKING END
