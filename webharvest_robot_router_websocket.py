@@ -19,7 +19,10 @@ def on_message(ws, message):
         This method is invoked when ever the client
         receives any message from server
     '''
-    print("on_message received message as {}".format(message))
+    # print("on_message received message as {}".format(message))
+    # front_text = message.get('text', None)
+    
+    print('message: ' + str(message))
     # ws.send("hello again")
     # print("sending 'hello again'")
 
@@ -47,10 +50,10 @@ def on_open(ws):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     text = {
-        'message': str('alice on_open ' + str(dt_string)),
-        'username': 'Alice',
-        'robot_id': 'Alice_0',
-        'human': 'dante@stringkeeper.com'
+        # 'message': str('alice on_open ' + str(dt_string)),
+        # 'username': 'Alice',
+        'robot_id': 'webharvest_robot_router',
+        # 'human': 'dante@stringkeeper.com'
 
     }
     ws.send(json.dumps(text))
@@ -66,10 +69,10 @@ def send_test_message(ws):
     text = str('Hello from Alice websocket ' + str(dt_string))
     print(text)
     text = {
-        'message': text,
-        'username': 'Alice',
-        'robot_id': 'Alice_0',
-        'human': 'dante@stringkeeper.com'
+        # 'message': text,
+        # 'username': 'Alice',
+        'robot_id': 'webharvest_robot_router',
+        # 'human': 'dante@stringkeeper.com'
     }
     ws.send(json.dumps(text))
 
