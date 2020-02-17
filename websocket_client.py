@@ -4,6 +4,16 @@ import json
 from datetime import datetime
 import threading
 
+# class websocket_client:
+
+# def __init__(self, name):
+#     self.name = name
+#     # self.api_url = 'https://stringkeeper.com/webhooks/webharvest/'
+#     self.api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
+#     self.user = ''
+#     self.chat = ''
+#     self.response = None
+
 def on_message(ws, message):
     '''
         This method is invoked when ever the client
@@ -29,28 +39,21 @@ def on_close(ws):
 def on_open(ws):
     '''
         This method is invoked as soon as the connection between 
-		client and server is opened and only for the first time
+        client and server is opened and only for the first time
     '''
     # ws.send("hello there")
 
-    # sleep(3)
-    # now = datetime.now()
-    # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    # text = {
-    #     'message': str('hello from alice websocket ' + str(dt_string)),
-    #     'username': 'Alice'
-    # }
-    # ws.send(json.dumps(text))
+    sleep(3)
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    text = {
+        'message': str('alice on_open ' + str(dt_string)),
+        'username': 'Alice',
+        'robot_id': 'Alice_0'
 
+    }
+    ws.send(json.dumps(text))
 
-    # my_text = {
-    #         'type': 'chat_message',
-    #         'text': json.dumps(text)
-
-    # }
-    # print('about to do socket send finalData')
-    # ws.send(my_text)
-    # print("sent message on open")
 
 def on_data(ws):
     print("on_data received message as {}".format(message))
@@ -63,7 +66,8 @@ def send_test_message(ws):
     print(text)
     text = {
         'message': text,
-        'username': 'Alice'
+        'username': 'Alice',
+        'robot_id': 'Alice_0'
     }
     ws.send(json.dumps(text))
 
@@ -76,7 +80,8 @@ if __name__ == "__main__":
         # "ws://localhost:9090/ws",
                               on_message = on_message,
                               on_error = on_error,
-                              on_close = on_close)
+                              on_close = on_close,
+                              on_open = on_open)
     # ws.on_open = on_open
     # ws.run_forever()
 
@@ -94,7 +99,9 @@ if __name__ == "__main__":
         # print('Hello world %d'%msg_counter)
         # ws.send('Hello world %d'%msg_counter)
         # ws.on_data()
-        send_test_message(ws)
-        sleep(10)
 
+
+        sleep(10)
+        send_test_message(ws)
+        
         # msg_counter += 1    
