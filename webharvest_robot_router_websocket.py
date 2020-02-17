@@ -19,12 +19,31 @@ def on_message(ws, message):
         This method is invoked when ever the client
         receives any message from server
     '''
-    # print("on_message received message as {}".format(message))
-    # front_text = message.get('text', None)
-    
-    print('message: ' + str(message))
-    # ws.send("hello again")
-    # print("sending 'hello again'")
+    # print('message: ' + str(message))
+    # inactive_users = message.get('inactive_users', None)
+    loaded_dict_data = json.loads(message)
+    # print('loaded_dict_data: ' + str(loaded_dict_data))
+
+    inactive_users_string = loaded_dict_data.get('inactive_users', None)
+    active_users_string = loaded_dict_data.get('active_users', None)
+
+    # print('inactive_users: ' + inactive_users)
+
+    inactive_users_dict = json.loads(inactive_users_string)
+
+    for key, value in inactive_users_dict.items():
+        print('inactive_user: ' + key, 'assigned_robot_name:', value)
+
+    active_users_dict = json.loads(active_users_string)
+
+    for key, value in active_users_dict.items():
+        print('active_user: ' + key, 'assigned_robot_name:', value)
+
+    # for item in active_users:
+    #     print('active_user: ' + str(item))
+
+    # for item in inactive_users:
+    #     print('inactive_user: ' + str(item))
 
 def on_error(ws, error):
     '''
