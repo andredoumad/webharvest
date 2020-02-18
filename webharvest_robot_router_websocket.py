@@ -5,16 +5,7 @@ from datetime import datetime
 import threading
 import socket
 import logging
-
-# class websocket_client:
-
-# def __init__(self, name):
-#     self.name = name
-#     # self.api_url = 'https://stringkeeper.com/webhooks/webharvest/'
-#     self.api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
-#     self.user = ''
-#     self.chat = ''
-#     self.response = None
+from standalone_tools import *
 
 def on_message(ws, message):
     '''
@@ -89,17 +80,27 @@ def send_test_message(ws):
 
 
 if __name__ == "__main__":
-    print('hostname: ' + str(socket.gethostname()))
-    exit()
+    eventlog('hostname: ' + str(socket.gethostname()))
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp(
-        # "wss://stringkeeper.com/webharvest/",
-        "ws://127.0.0.1:8000/webharvest/",
-        # "ws://localhost:9090/ws",
-                              on_message = on_message,
-                              on_error = on_error,
-                              on_close = on_close,
-                              on_open = on_open)
+    if str(socket.gethostname()) == "tr3b":
+        ws = websocket.WebSocketApp(
+            # "wss://stringkeeper.com/webharvest/",
+            "ws://127.0.0.1:8000/webharvest/",
+            # "ws://localhost:9090/ws",
+                                on_message = on_message,
+                                on_error = on_error,
+                                on_close = on_close,
+                                on_open = on_open)
+    else:
+        ws = websocket.WebSocketApp(
+            "wss://stringkeeper.com/webharvest/",
+            # "ws://127.0.0.1:8000/webharvest/",
+            # "ws://localhost:9090/ws",
+                                on_message = on_message,
+                                on_error = on_error,
+                                on_close = on_close,
+                                on_open = on_open)
+
     # ws.on_open = on_open
     # ws.run_forever()
 
@@ -119,7 +120,7 @@ if __name__ == "__main__":
         # ws.on_data()
 
 
-        sleep(10)
+        sleep(15)
         send_test_message(ws)
         
         # msg_counter += 1    
