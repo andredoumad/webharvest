@@ -12,7 +12,6 @@ import ftfy
 from datetime import date
 import calendar
 import datetime
-from django.utils import timezone
 
 import os.path
 import socket

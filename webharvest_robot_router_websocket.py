@@ -5,7 +5,7 @@ from datetime import datetime
 import threading
 import socket
 import logging
-from standaloneTools import *
+from standalone_tools import *
 
 def on_message(ws, message):
     '''
