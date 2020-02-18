@@ -19,12 +19,9 @@ from datetime import datetime
 
 
 def get_time_string():
-    #named_tuple = time.localtime() # get struct_time
-    now = timezone.now()
-    #now = datetime.datetime.utcnow().replace(tzinfo=utc)
-    #time_string = str(time.strftime("%Y-%m-%d-%H:%M:%S", named_tuple))
-    #time_string = str(time.strftime("%Y-%m-%d-%H:%M:%S", now))
-    return (now)
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    return (dt_string)
 
 # def get_client_ip(request):
 #     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

@@ -18,14 +18,14 @@ def on_message(ws, message):
     active_users_string = loaded_dict_data.get('active_users', None)
 
     inactive_users_dict = json.loads(inactive_users_string)
-
+    eventlog(str('TIME: ' + get_time_string()))
     for key, value in inactive_users_dict.items():
-        print('inactive_user: ' + key, 'assigned_robot_name:', value)
+        eventlog(str('inactive_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
 
     active_users_dict = json.loads(active_users_string)
 
     for key, value in active_users_dict.items():
-        print('active_user: ' + key, 'assigned_robot_name:', value)
+        eventlog(str('active_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
 
 
 def on_error(ws, error):
