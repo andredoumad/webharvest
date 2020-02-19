@@ -75,6 +75,7 @@ class WebHarvest:
     def get_update(self, ws):
         text = {
             'robot_id': 'webharvest_robot_router',
+            'robot_command': 'get_active_and_inactive_users',
         }
         ws.send(json.dumps(text))
 
@@ -127,15 +128,28 @@ class WebHarvest:
         eventlog('robot None: ' + str(self.user_robot_assignment_dict.get(human)))
         # robot.run_chatbot()
 
+    def set_all_users_to_inactive(self):
+        text = {
+            'robot_id': 'webharvest_robot_router',
+            'robot_command': 'set_all_users_to_inactive',
+        }
+        self.ws.send(json.dumps(text))
+
+
+
 if __name__ == "__main__":
     eventlog('hostname: ' + str(socket.gethostname()))
     websocket.enableTrace(True)
 
     harvest = WebHarvest('webharvest_instance_0')
 
+
     wst = threading.Thread(target=harvest.ws.run_forever)
     wst.daemon = True
     wst.start()
+
+    if str(socket.gethostname()) != "tr3b":
+        harvest.set_all_users_to_inactive()
 
     conn_timeout = 5
     while not harvest.ws.sock.connected and conn_timeout:
