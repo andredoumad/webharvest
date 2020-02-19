@@ -143,4 +143,4 @@ class ChatBot(threading.Thread):
         self.ws.keep_running = False
         eventlog('about to join')
         wst.join()
-        eventlog('run_chatbot ends')
+        eventlog('run_chatbot ends!')
