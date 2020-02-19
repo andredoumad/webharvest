@@ -36,7 +36,11 @@ class WebHarvest:
         eventlog(str('TIME: ' + get_time_string()))
         for key, value in inactive_users_dict.items():
             eventlog(str('inactive_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
-            if self.user_robot_assignment_dict.get(str(key)) != None:
+            robot = self.user_robot_assignment_dict.get(str(key))
+            if robot != None:
+                eventlog(str("self.user_robot_assignment_dict.get(str(key)) != None: " ))
+                eventlog('key: ' + str(key))
+                eventlog('robot: ' + str(robot))
                 self.remove_robot_from_user(str(key))
 
 
@@ -84,6 +88,7 @@ class WebHarvest:
             chatbot_thread = threading.Thread(target=robot.run_chatbot)    
             chatbot_thread.daemon = True
             chatbot_thread.start()
+            robot.thread = chatbot_thread
             self.user_robot_assignment_dict[human] = robot
         
         thread = self.user_robot_assignment_dict.get(human)
@@ -104,15 +109,22 @@ class WebHarvest:
             # self.user_robot_assignment_dict[human] = ChatBot('Alice', str(human))
 
         # del self.user_robot_assignment_dict.get(human)
-        robot = self.user_robot_assignment_dict.get(human)
-        robot.alive = False
+        # self.user_robot_assignment_dict.get(human).thread.join()
+        # robot.alive = False
         # robot.join()
         # robot = self.user_robot_assignment_dict.get(human)
         # eventlog('robot removed: ' + str(robot))
-
+        # eventlog('robot.thread: ' + str(robot.thread))
+        
+        # robot.thread.join()
+        # del robot.thread.join
+        # robot.join()
+        # del robot
+        self.user_robot_assignment_dict.get(human).alive = False
+        # robot = self.user_robot_assignment_dict.get(human)
         self.user_robot_assignment_dict[human] = None
-        robot = self.user_robot_assignment_dict.get(human)
-        eventlog('robot None: ' + str(robot))
+        
+        eventlog('robot None: ' + str(self.user_robot_assignment_dict.get(human)))
         # robot.run_chatbot()
 
 if __name__ == "__main__":
