@@ -148,8 +148,9 @@ if __name__ == "__main__":
     wst.daemon = True
     wst.start()
 
-    if str(socket.gethostname()) != "tr3b":
-        harvest.set_all_users_to_inactive()
+
+
+    initialized_server = False
 
     conn_timeout = 5
     while not harvest.ws.sock.connected and conn_timeout:
@@ -159,6 +160,10 @@ if __name__ == "__main__":
     msg_counter = 0
     while harvest.ws.sock.connected:
         sleep(5)
+        if initialized_server == False:
+            if str(socket.gethostname()) != "tr3b":
+                harvest.set_all_users_to_inactive()
+                initialized_server = True
         harvest.get_update(harvest.ws)
 
         
