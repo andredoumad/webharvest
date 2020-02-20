@@ -16,6 +16,9 @@ class ChatBot(threading.Thread):
         self.name = name
         self.human_email = human_email
         self.thread = None
+        self.last_activity = datetime.now()
+        self.switchboard = None
+        self.bool_timer_is_active = False
 
         if str(socket.gethostname()) == "tr3b":
             self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
@@ -30,25 +33,37 @@ class ChatBot(threading.Thread):
                         on_close   = lambda ws:     self.on_close(ws),
                         on_open    = lambda ws:     self.on_open(ws))
 
+    def check_for_inactive_user(self):
+        eventlog("checking for inactive user")
+        eventlog('self.last_activity: ' + str(self.last_activity))
+        time = datetime.now()
+        eventlog('datetime.now: ' + str(time))
+        difference = time - self.last_activity
+        eventlog('difference: ' + str(difference))
+        eventlog('the seconds since last activity is: ' + str(difference.seconds) )
+        if difference.seconds >= 30:
+            eventlog('the seconds since last activity is too long, shutting down chatbot' )
+            self.switchboard.remove_robot_from_user(self.human_email)
 
-
-    # def join(self, timeout=None):
-    #     """ Stop the thread. """
-    #     eventlog('Stop the thread called!')
-    #     # self._stopevent.set(  )
-    #     self.alive = False
-    #     threading.Thread.join(self, timeout)
 
     def on_message(self, ws, message):
-        print("on_message received message as {}".format(message))
-        # ws.send("hello again")
-        # print("sending 'hello again'")
+        eventlog("on_message received message as {}".format(message))
+        loaded_dict_data = json.loads(message)
+        username = loaded_dict_data.get('username', None)
+        if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
+            eventlog('updating timer for user status')
+            self.last_activity = datetime.now()
+            timer = threading.Timer(30.0, self.check_for_inactive_user)
+            timer.start()  # after 60 seconds, 'callback' will be called
+            self.bool_timer_is_active = True
+            # ws.send("hello again")
+            # eventlog("sending 'hello again'")
 
     def on_error(self, ws, error):
-        print("on_error received error as {}".format(error))
+        eventlog("on_error received error as {}".format(error))
 
     def on_close(self, ws):
-        print("on_close Connection closed")
+        eventlog("on_close Connection closed")
 
     def on_open(self, ws):
         sleep(3)
@@ -59,20 +74,17 @@ class ChatBot(threading.Thread):
             'username': self.name,
             'robot_id': self.name,
             'human': self.human_email
-
         }
         ws.send(json.dumps(text))
 
-
     def on_data(self, ws):
-        print("on_data received message as {}".format(message))
-
+        eventlog("on_data received message as {}".format(message))
 
     def send_test_message(self):
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
         text = str('hi there, im Alice, the time is ' + str(dt_string))
-        print(text)
+        eventlog(text)
         text = {
             'message': text,
             'username': self.name,
@@ -80,38 +92,6 @@ class ChatBot(threading.Thread):
             'human': self.human_email
         }
         self.ws.send(json.dumps(text))
-
-
-
-    # def run(self):
-    #     """ main control loop """
-    #     # print ("%s starts" % (self.getName(  ),))
-    #     print('main control loop')
-
-    #     count = 0
-    #     while self.alive == True:
-    #         count += 1
-    #         print ("loop " + str(count))
-    #         eventlog("I'm " + str(self.name) + " and I'm alive!")
-    #         # self._stopevent.wait(self._sleepperiod)
-    #         sleep(self.sleep_interval)
-
-    #     # while not self._stopevent.isSet(  ):
-    #     #     count += 1
-    #     #     print ("loop " + str(count))
-    #     #     if not self.alive:
-    #     #         eventlog("I'm " + str(self.name) + " and I'm DEAD!")
-    #     #         exit()
-    #     #     else:
-    #     #         eventlog("I'm " + str(self.name) + " and I'm alive!")
-    #     #     self._stopevent.wait(self._sleepperiod)
-    #     eventlog("I'm " + str(self.name) + " and I'm DEAD!")
-
-    #     print('main loop ends')
-    #     # print "%s ends" % (self.getName(  ),)
-
-
-
 
 
     def run_chatbot(self):

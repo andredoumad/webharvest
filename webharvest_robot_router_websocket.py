@@ -27,32 +27,45 @@ class WebHarvest:
         self.user_robot_assignment_dict = {}
 
     def on_message(self, ws, message):
+
         loaded_dict_data = json.loads(message)
+        robot_command = loaded_dict_data.get('robot_command', None)
 
-        inactive_users_string = loaded_dict_data.get('inactive_users', None)
-        active_users_string = loaded_dict_data.get('active_users', None)
+        if robot_command == 'get_active_and_inactive_users':
+            inactive_users_string = loaded_dict_data.get('inactive_users', None)
+            active_users_string = loaded_dict_data.get('active_users', None)
 
-        inactive_users_dict = json.loads(inactive_users_string)
-        eventlog(str('TIME: ' + get_time_string()))
-        for key, value in inactive_users_dict.items():
-            eventlog(str('inactive_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
-            robot = self.user_robot_assignment_dict.get(str(key))
-            if robot != None:
-                eventlog(str("self.user_robot_assignment_dict.get(str(key)) != None: " ))
-                eventlog('key: ' + str(key))
-                eventlog('robot: ' + str(robot))
-                self.remove_robot_from_user(str(key))
+            inactive_users_dict = json.loads(inactive_users_string)
+            eventlog(str('TIME: ' + get_time_string()))
+            for key, value in inactive_users_dict.items():
+                eventlog(str('inactive_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
+                robot = self.user_robot_assignment_dict.get(str(key))
+                if robot != None:
+                    eventlog(str("self.user_robot_assignment_dict.get(str(key)) != None: " ))
+                    eventlog('key: ' + str(key))
+                    eventlog('robot: ' + str(robot))
+                    self.remove_robot_from_user(str(key))
 
+            active_users_dict = json.loads(active_users_string)
 
-        active_users_dict = json.loads(active_users_string)
+            for key, value in active_users_dict.items():
+                eventlog(str('active_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
 
-        for key, value in active_users_dict.items():
-            eventlog(str('active_user: ' + str(key) + ' assigned_robot_name: ' + str(value)))
-
-            # if value == None:
-            if self.user_robot_assignment_dict.get(str(key)) == None:
-                eventlog(str('user: ' + str(key) + ' is active and needs a robot!'))
-                self.assign_robot_to_user(str(key))
+                # if value == None:
+                if self.user_robot_assignment_dict.get(str(key)) == None:
+                    eventlog(str('user: ' + str(key) + ' is active and needs a robot!'))
+                    self.assign_robot_to_user(str(key))
+        
+        elif robot_command == 'update_user_status':
+            eventlog('triggered updated_user_status!')
+            human = loaded_dict_data.get('human', None)
+            eventlog('human: ' + str(human))
+            message = loaded_dict_data.get('message', None)
+            eventlog('message: ' + str(message))
+            
+            if self.user_robot_assignment_dict.get(str(human)) == None:
+                eventlog(str('user: ' + str(human) + ' is active and needs a robot!'))
+                self.assign_robot_to_user(str(human))
 
     def on_error(self, ws, error):
         print("on_error received error as {}".format(error))
@@ -90,13 +103,12 @@ class WebHarvest:
             chatbot_thread.daemon = True
             chatbot_thread.start()
             robot.thread = chatbot_thread
+            robot.switchboard = self
             self.user_robot_assignment_dict[human] = robot
+            
         
         thread = self.user_robot_assignment_dict.get(human)
         eventlog('thread: ' + str(thread))
-
-        
-
         # robot.run_chatbot()
 
     def remove_robot_from_user(self, human):
@@ -107,35 +119,25 @@ class WebHarvest:
             eventlog('human not found...')
             eventlog('this should only fire if a human has a bot...')
             exit()
-            # self.user_robot_assignment_dict[human] = ChatBot('Alice', str(human))
 
-        # del self.user_robot_assignment_dict.get(human)
-        # self.user_robot_assignment_dict.get(human).thread.join()
-        # robot.alive = False
-        # robot.join()
-        # robot = self.user_robot_assignment_dict.get(human)
-        # eventlog('robot removed: ' + str(robot))
-        # eventlog('robot.thread: ' + str(robot.thread))
-        
-        # robot.thread.join()
-        # del robot.thread.join
-        # robot.join()
-        # del robot
         self.user_robot_assignment_dict.get(human).alive = False
-        # robot = self.user_robot_assignment_dict.get(human)
         self.user_robot_assignment_dict[human] = None
-        
         eventlog('robot None: ' + str(self.user_robot_assignment_dict.get(human)))
-        # robot.run_chatbot()
 
     def set_all_users_to_inactive(self):
         text = {
             'robot_id': 'webharvest_robot_router',
-            'robot_command': 'set_all_users_to_inactive',
+            'robot_command': 'set_all_users_to_inactive'
         }
         self.ws.send(json.dumps(text))
 
-
+    def subscribe_to_user_updates(self):
+        eventlog('subscribe_to_user_updates')
+        text = {
+            'robot_id': 'webharvest_robot_router',
+            'robot_command': 'subscribe_to_user_status_updates'
+        }
+        self.ws.send(json.dumps(text))
 
 if __name__ == "__main__":
     eventlog('hostname: ' + str(socket.gethostname()))
@@ -163,8 +165,9 @@ if __name__ == "__main__":
         if initialized_server == False:
             if str(socket.gethostname()) != "tr3b":
                 harvest.set_all_users_to_inactive()
-                initialized_server = True
-        harvest.get_update(harvest.ws)
+            harvest.subscribe_to_user_updates()
+            initialized_server = True
+        # harvest.get_update(harvest.ws)
 
         
 
