@@ -145,12 +145,9 @@ if __name__ == "__main__":
 
     harvest = WebHarvest('webharvest_instance_0')
 
-
     wst = threading.Thread(target=harvest.ws.run_forever)
     wst.daemon = True
     wst.start()
-
-
 
     initialized_server = False
 

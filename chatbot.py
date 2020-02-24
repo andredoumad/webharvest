@@ -45,7 +45,6 @@ class ChatBot(threading.Thread):
             eventlog('the seconds since last activity is too long, shutting down chatbot' )
             self.switchboard.remove_robot_from_user(self.human_email)
 
-
     def on_message(self, ws, message):
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
@@ -92,7 +91,6 @@ class ChatBot(threading.Thread):
             'human': self.human_email
         }
         self.ws.send(json.dumps(text))
-
 
     def run_chatbot(self):
         eventlog('hostname: ' + str(socket.gethostname()))
