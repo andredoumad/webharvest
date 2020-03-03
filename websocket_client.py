@@ -3,7 +3,7 @@ from time import sleep
 import json
 from datetime import datetime
 import threading
-
+import socket
 # class websocket_client:
 
 # def __init__(self, name):
@@ -78,8 +78,9 @@ if __name__ == "__main__":
     websocket.enableTrace(True)
     ws = websocket.WebSocketApp(
         # "wss://stringkeeper.com/webharvest/",
-        "ws://127.0.0.1:8000/webharvest/",
+        # "ws://127.0.0.1:8000/webharvest/",
         # "ws://localhost:9090/ws",
+        "ws://172.26.5.185:9090/ws", # spider_0
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close,

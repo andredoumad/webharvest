@@ -105,7 +105,8 @@ class WebHarvest:
             robot.thread = chatbot_thread
             robot.switchboard = self
             self.user_robot_assignment_dict[human] = robot
-            
+            robot.spider_ip = '127.0.0.1'
+            robot.spider_port = '9090'
         
         thread = self.user_robot_assignment_dict.get(human)
         eventlog('thread: ' + str(thread))
