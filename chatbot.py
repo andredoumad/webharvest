@@ -80,37 +80,37 @@ class ChatBot(threading.Thread):
         
         if self.state == 'initialized':
             if self.message_is_salutation(message):
-                self.send_message('Hello! How can I help you today?')
+                self.send_message_stringkeeper('Hello! How can I help you today?')
                 self.state = ('looking_for_command')
 
         if self.state == 'looking_for_command':
             if self.message_is_search(message):
-                self.send_message('What would you like to search for?')
+                self.send_message_stringkeeper('What would you like to search for?')
                 self.state = ('waiting_for_search_keys_input')
 
         if self.state == 'waiting_for_search_keys_input':
             if self.message_is_search(message):
-                self.send_message("I understand you'd like to search for: ")
-                self.send_message(str(message))
+                self.send_message_stringkeeper("I understand you'd like to search for: ")
+                self.send_message_stringkeeper(str(message))
                 self.command_input = str(message)
-                self.send_message("Is that correct?")
+                self.send_message_stringkeeper("Is that correct?")
 
             if self.message_user_agrees(message):
-                self.send_message("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                self.send_message(str(message))
+                self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
+                self.send_message_stringkeeper(str(message))
                 self.state = ('crawling_search_key_input')
             else:
-                self.send_message("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
+                self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
                 self.state = 'waiting_for_search_keys_input'
 
         if self.state == 'crawling_search_key_input':
             if self.mood != 'busy':
                 if self.message_is_stop(message):
-                    self.send_message("I'm sorry dave, I can't do that right now.")
+                    self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
                     self.mood = 'busy'
             else:
                 if self.message_is_stop(message):
-                    self.send_message("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
+                    self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
                     self.mood = 'busy'
 
     def send_message_spider(self, message):
@@ -121,7 +121,6 @@ class ChatBot(threading.Thread):
             'human': self.human_email
         }
         self.ws_spider.send(json.dumps(text))
-
 
     def on_error_spider(self, ws_spider, error):
         eventlog("on_error received error as {}".format(error))
@@ -158,37 +157,37 @@ class ChatBot(threading.Thread):
         
         if self.state == 'initialized':
             if self.message_is_salutation(message):
-                self.send_message('Hello! How can I help you today?')
+                self.send_message_stringkeeper('Hello! How can I help you today?')
                 self.state = ('looking_for_command')
 
         if self.state == 'looking_for_command':
             if self.message_is_search(message):
-                self.send_message('What would you like to search for?')
+                self.send_message_stringkeeper('What would you like to search for?')
                 self.state = ('waiting_for_search_keys_input')
 
         if self.state == 'waiting_for_search_keys_input':
             if self.message_is_search(message):
-                self.send_message("I understand you'd like to search for: ")
-                self.send_message(str(message))
+                self.send_message_stringkeeper("I understand you'd like to search for: ")
+                self.send_message_stringkeeper(str(message))
                 self.command_input = str(message)
-                self.send_message("Is that correct?")
+                self.send_message_stringkeeper("Is that correct?")
 
             if self.message_user_agrees(message):
-                self.send_message("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                self.send_message(str(message))
+                self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
+                self.send_message_stringkeeper(str(message))
                 self.state = ('crawling_search_key_input')
             else:
-                self.send_message("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
+                self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
                 self.state = 'waiting_for_search_keys_input'
 
         if self.state == 'crawling_search_key_input':
             if self.mood != 'busy':
                 if self.message_is_stop(message):
-                    self.send_message("I'm sorry dave, I can't do that right now.")
+                    self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
                     self.mood = 'busy'
             else:
                 if self.message_is_stop(message):
-                    self.send_message("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
+                    self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
                     self.mood = 'busy'
 
     def message_is_salutation(self, message):
@@ -310,7 +309,13 @@ class ChatBot(threading.Thread):
                 eventlog("I'm " + str(self.name) + " and I'm DEAD!")
                 exit()
             else:
-                eventlog("I'm " + str(self.name) + " and I'm alive!")
+                eventlog(
+                "Name: " + str(self.name) + 
+                " State: " + str(self.state) +
+                " Mood: " + str(self.mood) +
+                " Command: " + str(self.command) +
+                " Command_Input: " + str(self.command_input)
+                )
             sleep(1)
             # self.send_test_message_stringkeeper()
 
