@@ -23,6 +23,8 @@ class ChatBot(threading.Thread):
         self.mood = 'helpful'
         self.command = ''
         self.command_input = ''
+        self.To = ''
+        self.From = ''
 
         if str(socket.gethostname()) == "tr3b":
             self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
@@ -145,50 +147,58 @@ class ChatBot(threading.Thread):
     def on_message_stringkeeper(self, ws_stringkeeper, message):
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
-        username = loaded_dict_data.get('username', None)
-        if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
-            eventlog('updating timer for user status')
-            self.last_activity = datetime.now()
-            timer = threading.Timer(3600.0, self.check_for_inactive_user)
-            timer.start()  # after 60 seconds, 'callback' will be called
-            self.bool_timer_is_active = True
-            # ws_stringkeeper.send("hello again")
-            # eventlog("sending 'hello again'")
-        
-        if self.state == 'initialized':
-            if self.message_is_salutation(message):
-                self.send_message_stringkeeper('Hello! How can I help you today?')
-                self.state = ('looking_for_command')
+        robot_id = None
+        robot_id = loaded_dict_data.get('robot_id', None)
+        eventlog('robot_id: ' + str(robot_id))
 
-        if self.state == 'looking_for_command':
-            if self.message_is_search(message):
-                self.send_message_stringkeeper('What would you like to search for?')
-                self.state = ('waiting_for_search_keys_input')
+        self.To = None
+        self.From = None
+        self.To = loaded_dict_data.get('To', None)
+        eventlog('To: ' + str(self.To))
+        self.From = loaded_dict_data.get('From', None)
+        eventlog('From: ' + str(self.From))
 
-        if self.state == 'waiting_for_search_keys_input':
-            if self.message_is_search(message):
-                self.send_message_stringkeeper("I understand you'd like to search for: ")
-                self.send_message_stringkeeper(str(message))
-                self.command_input = str(message)
-                self.send_message_stringkeeper("Is that correct?")
+        if self.To != self.human_email and self.To != None and self.To != self.name:
+            username = loaded_dict_data.get('username', None)
+            if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
+                eventlog('updating timer for user status')
+                self.last_activity = datetime.now()
+                timer = threading.Timer(3600.0, self.check_for_inactive_user)
+                timer.start()  # after 60 seconds, 'callback' will be called
+                self.bool_timer_is_active = True
+                # ws_stringkeeper.send("hello again")
+                # eventlog("sending 'hello again'")
 
-            if self.message_user_agrees(message):
-                self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                self.send_message_stringkeeper(str(message))
-                self.state = ('crawling_search_key_input')
-            else:
-                self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
-                self.state = 'waiting_for_search_keys_input'
-
-        if self.state == 'crawling_search_key_input':
-            if self.mood != 'busy':
-                if self.message_is_stop(message):
-                    self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
-                    self.mood = 'busy'
-            else:
-                if self.message_is_stop(message):
-                    self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
-                    self.mood = 'busy'
+            if self.state == 'initialized':
+                if self.message_is_salutation(message):
+                    self.send_message_stringkeeper('Hello! How can I help you today?')
+                    self.state = ('looking_for_command')
+            elif self.state == 'looking_for_command':
+                if self.message_is_search(message):
+                    self.send_message_stringkeeper('What would you like to search for?')
+                    self.state = ('waiting_for_search_keys_input')
+            elif self.state == 'waiting_for_search_keys_input':
+                if self.message_is_search(message):
+                    self.send_message_stringkeeper("I understand you'd like to search for: ")
+                    self.send_message_stringkeeper(str(message))
+                    self.command_input = str(message)
+                    self.send_message_stringkeeper("Is that correct?")
+                if self.message_user_agrees(message):
+                    self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
+                    self.send_message_stringkeeper(str(message))
+                    self.state = ('crawling_search_key_input')
+                else:
+                    self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
+                    self.state = 'waiting_for_search_keys_input'
+            elif self.state == 'crawling_search_key_input':
+                if self.mood != 'busy':
+                    if self.message_is_stop(message):
+                        self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
+                        self.mood = 'busy'
+                else:
+                    if self.message_is_stop(message):
+                        self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
+                        self.mood = 'busy'
 
     def message_is_salutation(self, message):
         message = message.lower()
@@ -254,13 +264,16 @@ class ChatBot(threading.Thread):
 
     def on_open_stringkeeper(self, ws_stringkeeper):
         # sleep(3)
-        now = datetime.now()
-        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        # now = datetime.now()
+        # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
         text = {
-            'message': str('alice on_open ' + str(dt_string)),
+            'To': self.human_email,
+            'From': self.name,
+            'message': str('Welcome!'),
             'username': self.name,
             'robot_id': self.name,
             'human': self.human_email
+
         }
         ws_stringkeeper.send(json.dumps(text))
 
@@ -269,6 +282,8 @@ class ChatBot(threading.Thread):
 
     def send_message_stringkeeper(self, message):
         text = {
+            'To': self.human_email,
+            'From': self.name,
             'message': message,
             'username': self.name,
             'robot_id': self.name,
@@ -311,6 +326,9 @@ class ChatBot(threading.Thread):
             else:
                 eventlog(
                 "Name: " + str(self.name) + 
+                " Human: " + str(self.human_email) +
+                " To: " + str(self.To) +
+                " From: " + str(self.From) +
                 " State: " + str(self.state) +
                 " Mood: " + str(self.mood) +
                 " Command: " + str(self.command) +
