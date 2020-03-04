@@ -145,8 +145,10 @@ class ChatBot(threading.Thread):
 
     # STRINGKEEPER
     def on_message_stringkeeper(self, ws_stringkeeper, message):
+
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
+        eventlog('loaded_dict_data: ' + str(loaded_dict_data))
         robot_id = None
         robot_id = loaded_dict_data.get('robot_id', None)
         eventlog('robot_id: ' + str(robot_id))
@@ -155,10 +157,11 @@ class ChatBot(threading.Thread):
         self.From = None
         self.To = loaded_dict_data.get('To', None)
         eventlog('To: ' + str(self.To))
+        eventlog('message: ' + str(message))
         self.From = loaded_dict_data.get('From', None)
         eventlog('From: ' + str(self.From))
 
-        if self.To != self.human_email and self.To != None and self.To != self.name:
+        if self.From != self.name:
             username = loaded_dict_data.get('username', None)
             if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
                 eventlog('updating timer for user status')
@@ -178,18 +181,19 @@ class ChatBot(threading.Thread):
                     self.send_message_stringkeeper('What would you like to search for?')
                     self.state = ('waiting_for_search_keys_input')
             elif self.state == 'waiting_for_search_keys_input':
-                if self.message_is_search(message):
-                    self.send_message_stringkeeper("I understand you'd like to search for: ")
-                    self.send_message_stringkeeper(str(message))
-                    self.command_input = str(message)
-                    self.send_message_stringkeeper("Is that correct?")
+                self.send_message_stringkeeper("I understand you'd like to search for: ")
+                self.send_message_stringkeeper(str(message))
+                self.command_input = str(message)
+                self.send_message_stringkeeper("Is that correct?")
+                self.state = ('waiting_for_user_to_agree')
+            elif self.state == 'waiting_for_user_to_agree':
                 if self.message_user_agrees(message):
                     self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
                     self.send_message_stringkeeper(str(message))
                     self.state = ('crawling_search_key_input')
                 else:
                     self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
-                    self.state = 'waiting_for_search_keys_input'
+                    self.state = 'initialized'
             elif self.state == 'crawling_search_key_input':
                 if self.mood != 'busy':
                     if self.message_is_stop(message):
@@ -199,6 +203,20 @@ class ChatBot(threading.Thread):
                     if self.message_is_stop(message):
                         self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
                         self.mood = 'busy'
+
+
+    def send_message_stringkeeper(self, message):
+        eventlog('To: ' + str(self.human_email))
+        text = {
+            'To': self.human_email,
+            'From': self.name,
+            'message': message,
+            'username': self.name,
+            'robot_id': self.name,
+            'human': self.human_email
+        }
+        self.ws_stringkeeper.send(json.dumps(text))
+
 
     def message_is_salutation(self, message):
         message = message.lower()
@@ -280,16 +298,6 @@ class ChatBot(threading.Thread):
     def on_data_stringkeeper(self, ws_stringkeeper):
         eventlog("on_data received message as {}".format(message))
 
-    def send_message_stringkeeper(self, message):
-        text = {
-            'To': self.human_email,
-            'From': self.name,
-            'message': message,
-            'username': self.name,
-            'robot_id': self.name,
-            'human': self.human_email
-        }
-        self.ws_stringkeeper.send(json.dumps(text))
 
     def send_test_message_stringkeeper(self):
         now = datetime.now()
