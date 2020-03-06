@@ -143,6 +143,7 @@ class ChatBot(threading.Thread):
         ws_spider.send(json.dumps(text))
 
 
+
     # STRINGKEEPER
     def on_message_stringkeeper(self, ws_stringkeeper, message):
 
@@ -171,6 +172,13 @@ class ChatBot(threading.Thread):
                 self.bool_timer_is_active = True
                 # ws_stringkeeper.send("hello again")
                 # eventlog("sending 'hello again'")
+            
+            # check for clear screen message
+            self.robot_command_clear(message)
+
+            # check for clear screen message
+            self.robot_command_test_command(message)
+
 
             if self.state == 'initialized':
                 if self.message_is_salutation(message):
@@ -206,7 +214,9 @@ class ChatBot(threading.Thread):
 
 
     def send_message_stringkeeper(self, message):
-        eventlog('To: ' + str(self.human_email))
+        # eventlog('To: ' + str(self.human_email))
+        # eventlog('message: ' + str(message))
+
         text = {
             'To': self.human_email,
             'From': self.name,
@@ -216,6 +226,40 @@ class ChatBot(threading.Thread):
             'human': self.human_email
         }
         self.ws_stringkeeper.send(json.dumps(text))
+
+    def send_robot_command_stringkeeper(self, robot_command=None, message=None):
+        # eventlog('To: ' + str(self.human_email))
+        # eventlog('robot_command: ' + str(robot_command))
+        # eventlog('message: ' + str(message))
+        
+        text = {
+            'To': self.human_email,
+            'From': self.name,
+            'message': message,
+            'username': self.name,
+            'robot_id': self.name,
+            'human': self.human_email,
+            'robot_command': robot_command
+        }
+        self.ws_stringkeeper.send(json.dumps(text))
+
+    def robot_command_clear(self, message):
+        message = message.lower()
+        if message.find('clear') != -1:
+            eventlog('sending clear command')
+            self.send_robot_command_stringkeeper(robot_command='clear', message='clear')
+
+    def robot_command_test_command(self, message):
+        message = message.lower()
+        if message.find('test_command') != -1:
+            eventlog('sending test_command')
+            self.send_robot_command_stringkeeper(robot_command='test_command', message='test_command')
+
+
+    def send_stringkeeper_manual(self):
+        self.send_message_stringkeeper('I will respond to the following commands:')
+        self.send_message_stringkeeper('Clear')
+        self.send_message_stringkeeper('Search')
 
 
     def message_is_salutation(self, message):
@@ -284,33 +328,37 @@ class ChatBot(threading.Thread):
         # sleep(3)
         # now = datetime.now()
         # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        text = {
-            'To': self.human_email,
-            'From': self.name,
-            'message': str('Welcome!'),
-            'username': self.name,
-            'robot_id': self.name,
-            'human': self.human_email
+        # text = {
+        #     'To': self.human_email,
+        #     'From': self.name,
+        #     'message': str('Welcome!'),
+        #     'username': self.name,
+        #     'robot_id': self.name,
+        #     'human': self.human_email
 
-        }
-        ws_stringkeeper.send(json.dumps(text))
+        # }
+        # ws_stringkeeper.send('Welcome!')
+
+
+        self.send_message_stringkeeper('Welcome!')
+        self.send_stringkeeper_manual()
 
     def on_data_stringkeeper(self, ws_stringkeeper):
         eventlog("on_data received message as {}".format(message))
 
 
-    def send_test_message_stringkeeper(self):
-        now = datetime.now()
-        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        text = str('hi there, im Alice, the time is ' + str(dt_string))
-        eventlog(text)
-        text = {
-            'message': text,
-            'username': self.name,
-            'robot_id': self.name,
-            'human': self.human_email
-        }
-        self.ws_stringkeeper.send(json.dumps(text))
+    # def send_test_message_stringkeeper(self):
+    #     now = datetime.now()
+    #     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    #     text = str('hi there, im Alice, the time is ' + str(dt_string))
+    #     eventlog(text)
+    #     text = {
+    #         'message': text,
+    #         'username': self.name,
+    #         'robot_id': self.name,
+    #         'human': self.human_email
+    #     }
+    #     self.ws_stringkeeper.send(json.dumps(text))
 
     def run_chatbot(self):
         eventlog('hostname: ' + str(socket.gethostname()))
@@ -321,30 +369,61 @@ class ChatBot(threading.Thread):
         ws_stringkeeper_thread.start()
         # self.ws_stringkeeper.run_forever
         conn_timeout = 5
-
-        while not self.ws_stringkeeper.sock.connected and conn_timeout and self.alive:
-            sleep(1)
-            conn_timeout -= 1
+        try:
+            while not self.ws_stringkeeper.sock.connected and conn_timeout and self.alive:
+                sleep(1)
+                conn_timeout -= 1
+        except:
+            eventlog('chatbot disconnected!')
+            pass
 
         msg_counter = 0
-        while self.ws_stringkeeper.sock.connected and self.alive:
-            if not self.alive:
-                eventlog("I'm " + str(self.name) + " and I'm DEAD!")
-                exit()
-            else:
-                eventlog(
-                "Name: " + str(self.name) + 
-                " Human: " + str(self.human_email) +
-                " To: " + str(self.To) +
-                " From: " + str(self.From) +
-                " State: " + str(self.state) +
-                " Mood: " + str(self.mood) +
-                " Command: " + str(self.command) +
-                " Command_Input: " + str(self.command_input)
-                )
-            sleep(1)
-            # self.send_test_message_stringkeeper()
 
+        # while self.alive:
+        #     try:
+        #         while self.ws_stringkeeper.sock.connected and self.alive:
+        #             if not self.alive:
+        #                 eventlog("I'm " + str(self.name) + " and I'm DEAD!")
+        #                 exit()
+        #             else:
+        #                 eventlog(
+        #                 "Name: " + str(self.name) + 
+        #                 " Human: " + str(self.human_email) +
+        #                 " To: " + str(self.To) +
+        #                 " From: " + str(self.From) +
+        #                 " State: " + str(self.state) +
+        #                 " Mood: " + str(self.mood) +
+        #                 " Command: " + str(self.command) +
+        #                 " Command_Input: " + str(self.command_input)
+        #                 )
+        #             sleep(1)
+        #             # self.send_test_message_stringkeeper()
+        #     except:
+        #         eventlog('sleeping for 3 seconds before trying to reconnect...')
+        #         sleep(3)
+
+        try:
+            while self.ws_stringkeeper.sock.connected and self.alive:
+                if not self.alive:
+                    eventlog("I'm " + str(self.name) + " and I'm DEAD!")
+                    exit()
+                else:
+                    eventlog(
+                    "Name: " + str(self.name) + 
+                    " Human: " + str(self.human_email) +
+                    " To: " + str(self.To) +
+                    " From: " + str(self.From) +
+                    " State: " + str(self.state) +
+                    " Mood: " + str(self.mood) +
+                    " Command: " + str(self.command) +
+                    " Command_Input: " + str(self.command_input)
+                    )
+                sleep(1)
+                # self.send_test_message_stringkeeper()
+        except:
+            eventlog('chatbot disconnected!')
+        
+        self.alive = False
         eventlog('setting keep_running to false')
         self.ws_stringkeeper.keep_running = False
         eventlog('about to join')

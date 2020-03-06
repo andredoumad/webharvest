@@ -164,7 +164,7 @@ def eventlog(logstring):
     f.write('|==| ' + str(debug_line_number) + ' |==| ' + str(filename)[-25:] + ' | ' + str(function_name) + ' | ' + str(logstring) + ' |==|')
     f.write('\n')
     f.close()
-    if os.path.getsize(LOGGING_FILEPATH) > 1000000:
+    if os.path.getsize(LOGGING_FILEPATH) > 100000:
         f = open(LOGGING_FILEPATH, "w")
         f.write('')
         f.close()        

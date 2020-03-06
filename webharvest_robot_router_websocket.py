@@ -140,7 +140,9 @@ class WebHarvest:
         }
         self.ws.send(json.dumps(text))
 
-if __name__ == "__main__":
+
+
+def run_webharvest():
     eventlog('hostname: ' + str(socket.gethostname()))
     websocket.enableTrace(True)
 
@@ -158,14 +160,64 @@ if __name__ == "__main__":
         conn_timeout -= 1
 
     msg_counter = 0
-    while harvest.ws.sock.connected:
-        sleep(5)
-        if initialized_server == False:
-            if str(socket.gethostname()) != "tr3b":
-                harvest.set_all_users_to_inactive()
-            harvest.subscribe_to_user_updates()
-            initialized_server = True
-        # harvest.get_update(harvest.ws)
+    try:
+        while harvest.ws.sock.connected:
+            sleep(5)
+            if initialized_server == False:
+                if str(socket.gethostname()) != "tr3b":
+                    harvest.set_all_users_to_inactive()
+                harvest.subscribe_to_user_updates()
+                initialized_server = True
+            # harvest.get_update(harvest.ws)
+    except:
+        eventlog('disconnected....')
+    
+    harvest.alive = False
+    sleep(1)
+    wst.join()
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    while True:
+        try:
+            run_webharvest()
+        except:
+            eventlog('trying to connect...')
+            sleep(5)
+
+
+# if __name__ == "__main__":
+#     eventlog('hostname: ' + str(socket.gethostname()))
+#     websocket.enableTrace(True)
+
+#     harvest = WebHarvest('webharvest_instance_0')
+
+#     wst = threading.Thread(target=harvest.ws.run_forever)
+#     wst.daemon = True
+#     wst.start()
+
+#     initialized_server = False
+
+#     conn_timeout = 5
+#     while not harvest.ws.sock.connected and conn_timeout:
+#         sleep(1)
+#         conn_timeout -= 1
+
+#     msg_counter = 0
+
+#     while harvest.ws.sock.connected:
+#         sleep(5)
+#         if initialized_server == False:
+#             if str(socket.gethostname()) != "tr3b":
+#                 harvest.set_all_users_to_inactive()
+#             harvest.subscribe_to_user_updates()
+#             initialized_server = True
+#         # harvest.get_update(harvest.ws)
 
         
 
