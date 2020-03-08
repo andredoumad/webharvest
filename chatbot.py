@@ -7,6 +7,13 @@ import socket
 import logging
 from standalone_tools import *
 
+
+
+
+
+
+
+
 class ChatBot(threading.Thread):
     def __init__(self, name, human_email):
         # self._stopevent = threading.Event(  )
@@ -25,6 +32,7 @@ class ChatBot(threading.Thread):
         self.command_input = ''
         self.To = ''
         self.From = ''
+        self.previous_message_bot_message_type = ''
 
         if str(socket.gethostname()) == "tr3b":
             self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
@@ -90,9 +98,9 @@ class ChatBot(threading.Thread):
         if self.state == 'looking_for_command' or self.state == 'initialized':
             if self.message_is_search(message):
                 self.send_message_stringkeeper('What would you like to search for?')
-                self.state = ('waiting_for_search_keys_input')
+                self.state = ('enter_search_keys')
 
-        if self.state == 'waiting_for_search_keys_input':
+        if self.state == 'enter_search_keys':
             if self.message_is_search(message):
                 self.send_message_stringkeeper("I understand you'd like to search for: ")
                 self.send_message_stringkeeper(str(message))
@@ -106,7 +114,7 @@ class ChatBot(threading.Thread):
             else:
                 self.send_message_stringkeeper("I have canceled that job.")
                 self.send_stringkeeper_manual()
-                self.state = 'waiting_for_search_keys_input'
+                self.state = 'enter_search_keys'
 
         if self.state == 'crawling_search_key_input':
             if self.mood != 'busy':
@@ -180,43 +188,46 @@ class ChatBot(threading.Thread):
             # check for clear screen message
             self.robot_command_clear(message)
 
-            # check for clear screen message
-            self.robot_command_test_command(message)
-
 
             if self.state == 'initialized':
+                eventlog(random('salutation'))
+                self.send_message_stringkeeper(random("salutation"))
+                self.send_stringkeeper_manual()
+                self.state = ('looking_for_command')
+            elif self.state == 'looking_for_command' or 'initialized':
                 if self.message_is_salutation(message):
-                    self.send_message_stringkeeper('Hello! How can I help you today?')
-                    self.send_stringkeeper_manual()
-                    self.state = ('looking_for_command')
-            elif self.state == 'looking_for_command':
-                if self.message_is_search(message):
-                    self.send_message_stringkeeper('What would you like to search for?')
-                    self.state = ('waiting_for_search_keys_input')
-            elif self.state == 'waiting_for_search_keys_input':
-                self.send_message_stringkeeper("I understand you'd like to search for: ")
-                self.send_message_stringkeeper(str(message))
+                    self.send_message_stringkeeper(random("salutation"))
+                elif self.message_is_search(message):
+                    self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
+                    self.state = ('enter_search_keys')
+                self.send_stringkeeper_manual()
+            elif self.state == 'enter_search_keys':
+                self.send_message_stringkeeper(random("chat/out/echo_input") + message)
                 self.command_input = str(message)
-                self.send_message_stringkeeper("Is that correct?")
-                self.state = ('waiting_for_user_to_agree')
-            elif self.state == 'waiting_for_user_to_agree':
+                self.send_message_stringkeeper(random("chat/out/question/confirm"))
+                self.state = ('confirm')
+            elif self.state == 'confirm':
                 if self.message_user_agrees(message):
-                    self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                    # self.send_message_stringkeeper(str(message))
+                    self.send_message_stringkeeper(random("chat/out/starting_search"))
                     self.state = ('crawling_search_key_input')
                 else:
-                    self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
+                    self.send_message_stringkeeper(random("chat/out/stopping_work"))
                     self.state = 'initialized'
             elif self.state == 'crawling_search_key_input':
+                if self.message_is_stop(message):
+                    self.send_message_stringkeeper(random("chat/out/stopping_work"))
+                    self.state = 'initialized'
+                # if self.mood != 'busy':
+                #     if self.message_is_stop(message):
+                #         self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
+                #         self.mood = 'busy'
+                # else:
+                #     if self.message_is_stop(message):
+                #         self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
+                #         self.mood = 'busy'
 
-                if self.mood != 'busy':
-                    if self.message_is_stop(message):
-                        self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
-                        self.mood = 'busy'
-                else:
-                    if self.message_is_stop(message):
-                        self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
-                        self.mood = 'busy'
+
+    # def get_random_salutation(self):
 
 
     def send_message_stringkeeper(self, message):
@@ -255,18 +266,16 @@ class ChatBot(threading.Thread):
             eventlog('sending clear command')
             self.send_robot_command_stringkeeper(robot_command='clear', message='clear')
 
-    def robot_command_test_command(self, message):
-        message = message.lower()
-        if message.find('test_command') != -1:
-            eventlog('sending test_command')
-            self.send_robot_command_stringkeeper(robot_command='test_command', message='test_command')
-
 
     def send_stringkeeper_manual(self):
-        self.send_message_stringkeeper('I will respond to the following commands:')
-        self.send_message_stringkeeper('Clear')
-        self.send_message_stringkeeper('Search')
+        self.send_message_stringkeeper('"clear" removes old text from screen.')
+        self.send_message_stringkeeper('"search" define and execute a search.')
+        # self.send_message_stringkeeper('Reply with "help" for instructions.')
 
+    def previous_message_bot_message_type(self):
+        previous_frame = inspect.currentframe().f_back
+        (filename, line_number,  function_name, lines, index) = inspect.getframeinfo(previous_frame)
+        self.previous_message_bot_message_type = str(function_name)
 
     def message_is_salutation(self, message):
         message = message.lower()
@@ -283,9 +292,11 @@ class ChatBot(threading.Thread):
         
     def message_is_search(self, message):
         message = message.lower()
-        if message.find('search') != -1: 
+        if message.find('search') != -1:
+            self.previous_message_bot_message_type()
             return True
         elif message.find('find') != -1: 
+            self.previous_message_bot_message_type()
             return True
         else:
             return False
@@ -293,16 +304,22 @@ class ChatBot(threading.Thread):
     def message_user_agrees(self, message):
         message = message.lower()
         if message.find('yes') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('ok') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('agree') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('yeah') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('alright') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('yup') != -1: 
+            self.previous_message_bot_message_type()
             return True
         else:
             return False
@@ -310,16 +327,22 @@ class ChatBot(threading.Thread):
     def message_is_stop(self, message):
         message = message.lower()
         if message.find('stop') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('halt') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('exit') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('cancel') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('wait') != -1: 
+            self.previous_message_bot_message_type()
             return True
         elif message.find('no') != -1: 
+            self.previous_message_bot_message_type()
             return True
         else:
             return False
@@ -435,3 +458,8 @@ class ChatBot(threading.Thread):
         eventlog('about to join')
         ws_stringkeeper_thread.join()
         eventlog('run_chatbot ends!')
+
+
+
+if __name__ == "__main__":
+    eventlog(random('salutation'))

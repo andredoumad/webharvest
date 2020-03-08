@@ -179,3 +179,17 @@ def find_between(s, first, last ):
         return s[start:end]
     except ValueError:
         return ''
+
+
+def random(fname):
+    lines = open(fname).read().splitlines()
+    line = str(choice(lines))
+    # eventlog('random line: ' + line )
+    return line
+
+
+
+
+
+if __name__ == "__main__":
+    eventlog(random('salutation'))
