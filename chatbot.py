@@ -71,6 +71,7 @@ class ChatBot(threading.Thread):
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
         username = loaded_dict_data.get('username', None)
+        message = loaded_dict_data.get('message', None)
         if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
             eventlog('updating timer for user status')
             self.last_activity = datetime.now()
@@ -79,13 +80,14 @@ class ChatBot(threading.Thread):
             self.bool_timer_is_active = True
             # ws_stringkeeper.send("hello again")
             # eventlog("sending 'hello again'")
+
         
         if self.state == 'initialized':
             if self.message_is_salutation(message):
                 self.send_message_stringkeeper('Hello! How can I help you today?')
                 self.state = ('looking_for_command')
 
-        if self.state == 'looking_for_command':
+        if self.state == 'looking_for_command' or self.state == 'initialized':
             if self.message_is_search(message):
                 self.send_message_stringkeeper('What would you like to search for?')
                 self.state = ('waiting_for_search_keys_input')
@@ -93,6 +95,7 @@ class ChatBot(threading.Thread):
         if self.state == 'waiting_for_search_keys_input':
             if self.message_is_search(message):
                 self.send_message_stringkeeper("I understand you'd like to search for: ")
+
                 self.send_message_stringkeeper(str(message))
                 self.command_input = str(message)
                 self.send_message_stringkeeper("Is that correct?")
