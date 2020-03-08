@@ -95,7 +95,6 @@ class ChatBot(threading.Thread):
         if self.state == 'waiting_for_search_keys_input':
             if self.message_is_search(message):
                 self.send_message_stringkeeper("I understand you'd like to search for: ")
-
                 self.send_message_stringkeeper(str(message))
                 self.command_input = str(message)
                 self.send_message_stringkeeper("Is that correct?")
@@ -162,6 +161,7 @@ class ChatBot(threading.Thread):
         self.From = None
         self.To = loaded_dict_data.get('To', None)
         eventlog('To: ' + str(self.To))
+        message = loaded_dict_data.get('message', None)
         eventlog('message: ' + str(message))
         self.From = loaded_dict_data.get('From', None)
         eventlog('From: ' + str(self.From))
@@ -202,12 +202,13 @@ class ChatBot(threading.Thread):
             elif self.state == 'waiting_for_user_to_agree':
                 if self.message_user_agrees(message):
                     self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                    self.send_message_stringkeeper(str(message))
+                    # self.send_message_stringkeeper(str(message))
                     self.state = ('crawling_search_key_input')
                 else:
                     self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
                     self.state = 'initialized'
             elif self.state == 'crawling_search_key_input':
+
                 if self.mood != 'busy':
                     if self.message_is_stop(message):
                         self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
