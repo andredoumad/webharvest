@@ -102,7 +102,8 @@ class ChatBot(threading.Thread):
                 self.send_message_stringkeeper(str(message))
                 self.state = ('crawling_search_key_input')
             else:
-                self.send_message_stringkeeper("I have canceled that job. I am designed to search for emails related to your search. What would you like to search for?")
+                self.send_message_stringkeeper("I have canceled that job.")
+                self.send_stringkeeper_manual()
                 self.state = 'waiting_for_search_keys_input'
 
         if self.state == 'crawling_search_key_input':
@@ -183,6 +184,7 @@ class ChatBot(threading.Thread):
             if self.state == 'initialized':
                 if self.message_is_salutation(message):
                     self.send_message_stringkeeper('Hello! How can I help you today?')
+                    self.send_stringkeeper_manual()
                     self.state = ('looking_for_command')
             elif self.state == 'looking_for_command':
                 if self.message_is_search(message):
