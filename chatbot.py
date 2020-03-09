@@ -113,7 +113,6 @@ class ChatBot(threading.Thread):
                 self.state = ('crawling_search_key_input')
             else:
                 self.send_message_stringkeeper("I have canceled that job.")
-                self.send_stringkeeper_manual()
                 self.state = 'enter_search_keys'
 
         if self.state == 'crawling_search_key_input':
@@ -160,19 +159,19 @@ class ChatBot(threading.Thread):
 
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
-        eventlog('loaded_dict_data: ' + str(loaded_dict_data))
+        # eventlog('loaded_dict_data: ' + str(loaded_dict_data))
         robot_id = None
         robot_id = loaded_dict_data.get('robot_id', None)
-        eventlog('robot_id: ' + str(robot_id))
+        # eventlog('robot_id: ' + str(robot_id))
 
         self.To = None
         self.From = None
         self.To = loaded_dict_data.get('To', None)
-        eventlog('To: ' + str(self.To))
+        # eventlog('To: ' + str(self.To))
         message = loaded_dict_data.get('message', None)
-        eventlog('message: ' + str(message))
+        # eventlog('message: ' + str(message))
         self.From = loaded_dict_data.get('From', None)
-        eventlog('From: ' + str(self.From))
+        # eventlog('From: ' + str(self.From))
 
         if self.From != self.name:
             username = loaded_dict_data.get('username', None)
@@ -182,29 +181,32 @@ class ChatBot(threading.Thread):
                 timer = threading.Timer(3600.0, self.check_for_inactive_user)
                 timer.start()  # after 60 seconds, 'callback' will be called
                 self.bool_timer_is_active = True
-                # ws_stringkeeper.send("hello again")
-                # eventlog("sending 'hello again'")
             
             # check for clear screen message
             self.robot_command_clear(message)
 
-
             if self.state == 'initialized':
-                eventlog(random('salutation'))
+                eventlog('\n greeting user \n')
+                # eventlog(random('salutation'))
                 self.send_message_stringkeeper(random("salutation"))
-
                 self.state = ('looking_for_command')
-            elif self.state == 'looking_for_command' or 'initialized':
-                if self.message_is_salutation(message):
+
+            if self.state == 'looking_for_command' or self.state == 'initialized':
+                eventlog('\n checking for search commands \n')
+                complete = False
+                complete = self.message_search(message)
+                if complete:
+                    pass
+                elif self.message_is_salutation(message):
                     self.send_message_stringkeeper(random("salutation"))
-                elif self.message_is_search(message):
-                    self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
-                    self.state = ('enter_search_keys')
+
             elif self.state == 'enter_search_keys':
+                eventlog('\n checking for search input keys \n')
                 self.send_message_stringkeeper(random("chat/out/echo_input") + message)
                 self.command_input = str(message)
                 self.send_message_stringkeeper(random("chat/out/question/confirm"))
                 self.state = ('confirm')
+
             elif self.state == 'confirm':
                 if self.message_user_agrees(message):
                     self.send_message_stringkeeper(random("chat/out/starting_search"))
@@ -216,17 +218,6 @@ class ChatBot(threading.Thread):
                 if self.message_is_stop(message):
                     self.send_message_stringkeeper(random("chat/out/stopping_work"))
                     self.state = 'initialized'
-                # if self.mood != 'busy':
-                #     if self.message_is_stop(message):
-                #         self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
-                #         self.mood = 'busy'
-                # else:
-                #     if self.message_is_stop(message):
-                #         self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
-                #         self.mood = 'busy'
-
-
-    # def get_random_salutation(self):
 
 
     def send_message_stringkeeper(self, message):
@@ -289,17 +280,45 @@ class ChatBot(threading.Thread):
         else:
             return False
         
-    def message_is_search(self, message):
+    def message_search(self, message):
+        eventlog('message_search')
         message = message.lower()
-        if message.find('search') != -1:
-            self.UpdatePreviousMessageBotMessageType()
-            return True
-        elif message.find('find') != -1: 
+        prompt_for_search_keys = False
+        search_keys = None
+        triggered = False
+        if message == 'search' or message == 'find':
+            eventlog('FOUND SEARCH TRIGGER')
+            prompt_for_search_keys = True
+
+        elif message.find('search') != -1:
+            search_keys = message.replace('search', '')
+        elif message.find('find') != -1:
+            search_keys = message.replace('search', '')
+        elif message.find('look') != -1:
+            search_keys = message.replace('look', '')
+
+        # found search commands with search keys
+        if search_keys != None:
+            search_keys = search_keys.replace('for', '')
+            self.send_message_stringkeeper(random("chat/out/echo_input") + search_keys)
+            self.command_input = str(search_keys)
+            self.send_message_stringkeeper(random("chat/out/question/confirm"))
+            self.state = ('confirm')
+            triggered = True
+
+        # found only search commands
+        if prompt_for_search_keys == True:
+            # self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
+            self.state = ('enter_search_keys')
+            # self.UpdatePreviousMessageBotMessageType()
+            triggered = True
+
+        if triggered == True:
             self.UpdatePreviousMessageBotMessageType()
             return True
         else:
             return False
-        
+
     def message_user_agrees(self, message):
         message = message.lower()
         if message.find('yes') != -1: 
@@ -353,40 +372,11 @@ class ChatBot(threading.Thread):
         eventlog("on_close Connection closed")
 
     def on_open_stringkeeper(self, ws_stringkeeper):
-        # sleep(3)
-        # now = datetime.now()
-        # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        # text = {
-        #     'To': self.human_email,
-        #     'From': self.name,
-        #     'message': str('Welcome!'),
-        #     'username': self.name,
-        #     'robot_id': self.name,
-        #     'human': self.human_email
-
-        # }
-        # ws_stringkeeper.send('Welcome!')
-
-
         self.send_message_stringkeeper('Welcome!')
-        self.send_stringkeeper_manual()
 
     def on_data_stringkeeper(self, ws_stringkeeper):
         eventlog("on_data received message as {}".format(message))
 
-
-    # def send_test_message_stringkeeper(self):
-    #     now = datetime.now()
-    #     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    #     text = str('hi there, im Alice, the time is ' + str(dt_string))
-    #     eventlog(text)
-    #     text = {
-    #         'message': text,
-    #         'username': self.name,
-    #         'robot_id': self.name,
-    #         'human': self.human_email
-    #     }
-    #     self.ws_stringkeeper.send(json.dumps(text))
 
     def run_chatbot(self):
         eventlog('hostname: ' + str(socket.gethostname()))
@@ -446,7 +436,7 @@ class ChatBot(threading.Thread):
                     " Command: " + str(self.command) +
                     " Command_Input: " + str(self.command_input)
                     )
-                sleep(1)
+                sleep(3)
                 # self.send_test_message_stringkeeper()
         except:
             eventlog('chatbot disconnected!')
