@@ -199,6 +199,10 @@ class ChatBot(threading.Thread):
                     pass
                 elif self.message_is_salutation(message):
                     self.send_message_stringkeeper(random("salutation"))
+                else:
+                    self.message_search('search ' + message)
+                    
+                    
 
             elif self.state == 'enter_search_keys':
                 eventlog('\n checking for search input keys \n')
