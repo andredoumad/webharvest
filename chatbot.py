@@ -192,7 +192,7 @@ class ChatBot(threading.Thread):
             if self.state == 'initialized':
                 eventlog(random('salutation'))
                 self.send_message_stringkeeper(random("salutation"))
-                self.send_stringkeeper_manual()
+
                 self.state = ('looking_for_command')
             elif self.state == 'looking_for_command' or 'initialized':
                 if self.message_is_salutation(message):
@@ -200,7 +200,6 @@ class ChatBot(threading.Thread):
                 elif self.message_is_search(message):
                     self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
                     self.state = ('enter_search_keys')
-                self.send_stringkeeper_manual()
             elif self.state == 'enter_search_keys':
                 self.send_message_stringkeeper(random("chat/out/echo_input") + message)
                 self.command_input = str(message)
@@ -272,7 +271,7 @@ class ChatBot(threading.Thread):
         self.send_message_stringkeeper('"search" define and execute a search.')
         # self.send_message_stringkeeper('Reply with "help" for instructions.')
 
-    def previous_message_bot_message_type(self):
+    def UpdatePreviousMessageBotMessageType(self):
         previous_frame = inspect.currentframe().f_back
         (filename, line_number,  function_name, lines, index) = inspect.getframeinfo(previous_frame)
         self.previous_message_bot_message_type = str(function_name)
@@ -293,10 +292,10 @@ class ChatBot(threading.Thread):
     def message_is_search(self, message):
         message = message.lower()
         if message.find('search') != -1:
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('find') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         else:
             return False
@@ -304,22 +303,22 @@ class ChatBot(threading.Thread):
     def message_user_agrees(self, message):
         message = message.lower()
         if message.find('yes') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('ok') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('agree') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('yeah') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('alright') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('yup') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         else:
             return False
@@ -327,22 +326,22 @@ class ChatBot(threading.Thread):
     def message_is_stop(self, message):
         message = message.lower()
         if message.find('stop') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('halt') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('exit') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('cancel') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('wait') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         elif message.find('no') != -1: 
-            self.previous_message_bot_message_type()
+            self.UpdatePreviousMessageBotMessageType()
             return True
         else:
             return False
