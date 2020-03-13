@@ -7,13 +7,6 @@ import socket
 import logging
 from standalone_tools import *
 
-
-
-
-
-
-
-
 class ChatBot(threading.Thread):
     def __init__(self, name, human_email):
         # self._stopevent = threading.Event(  )
@@ -33,14 +26,17 @@ class ChatBot(threading.Thread):
         self.To = ''
         self.From = ''
         self.previous_message_bot_message_type = ''
+        self.user_search_keys = ''
 
         if str(socket.gethostname()) == "tr3b":
+            eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
             self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
                         on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
                         on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
                         on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
         else:
+            eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
             self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
                         on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
@@ -48,17 +44,21 @@ class ChatBot(threading.Thread):
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
         if str(socket.gethostname()) == "tr3b":
-            self.ws_spider = websocket.WebSocketApp("ws://127.0.0.1:9090/ws",
+            eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
+            self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
                         on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
                         on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
                         on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
                         on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
         else:
+            eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
             self.ws_spider = websocket.WebSocketApp("ws://172.26.5.185:9090/ws",
                         on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                        on_error  = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
                         on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
                         on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+        
+        # self.send_spider_test_message()
 
 
     def check_for_inactive_user(self):
@@ -73,86 +73,60 @@ class ChatBot(threading.Thread):
             eventlog('the seconds since last activity is too long, shutting down chatbot' )
             self.switchboard.remove_robot_from_user(self.human_email)
 
-
     # SPIDER
     def on_message_spider(self, ws_spider, message):
+        eventlog('ON MESSAGE SPIDER TRIGGERED!')
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
-        username = loaded_dict_data.get('username', None)
         message = loaded_dict_data.get('message', None)
-        if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
-            eventlog('updating timer for user status')
-            self.last_activity = datetime.now()
-            timer = threading.Timer(3600.0, self.check_for_inactive_user)
-            timer.start()  # after 60 seconds, 'callback' will be called
-            self.bool_timer_is_active = True
-            # ws_stringkeeper.send("hello again")
-            # eventlog("sending 'hello again'")
+        command = loaded_dict_data.get('command', None)
+        robot_id = loaded_dict_data.get('robot_id', None)
+        human = loaded_dict_data.get('human', None)
 
-        
-        if self.state == 'initialized':
-            if self.message_is_salutation(message):
-                self.send_message_stringkeeper('Hello! How can I help you today?')
-                self.state = ('looking_for_command')
 
-        if self.state == 'looking_for_command' or self.state == 'initialized':
-            if self.message_is_search(message):
-                self.send_message_stringkeeper('What would you like to search for?')
-                self.state = ('enter_search_keys')
+        if command == 'print':
+            self.send_message_stringkeeper(message)
 
-        if self.state == 'enter_search_keys':
-            if self.message_is_search(message):
-                self.send_message_stringkeeper("I understand you'd like to search for: ")
-                self.send_message_stringkeeper(str(message))
-                self.command_input = str(message)
-                self.send_message_stringkeeper("Is that correct?")
 
-            if self.message_user_agrees(message):
-                self.send_message_stringkeeper("Alright, I'm going to begin the search for emails related to your keys and I'll show you what I'm finding as I find it.")
-                self.send_message_stringkeeper(str(message))
-                self.state = ('crawling_search_key_input')
-            else:
-                self.send_message_stringkeeper("I have canceled that job.")
-                self.state = 'enter_search_keys'
-
-        if self.state == 'crawling_search_key_input':
-            if self.mood != 'busy':
-                if self.message_is_stop(message):
-                    self.send_message_stringkeeper("I'm sorry dave, I can't do that right now.")
-                    self.mood = 'busy'
-            else:
-                if self.message_is_stop(message):
-                    self.send_message_stringkeeper("I'm only programmed to run this job for a few minutes and when I'm done I'll be ready for further commands.")
-                    self.mood = 'busy'
-
-    def send_message_spider(self, message):
+    # SPIDER
+    def send_message_spider(self, command_input, command):
+        eventlog('ON SEND SPIDER TRIGGERED!')
         text = {
-            'message': message,
+            'message': command_input,
+            'spider_command': command,
             'username': self.name,
             'robot_id': self.name,
             'human': self.human_email
         }
         self.ws_spider.send(json.dumps(text))
 
+    # SPIDER
     def on_error_spider(self, ws_spider, error):
+        eventlog('ON ERROR SPIDER TRIGGERED!')
         eventlog("on_error received error as {}".format(error))
 
+    # SPIDER
     def on_close_spider(self, ws_spider):
+        eventlog('ON CLOSE SPIDER TRIGGERED!')
         eventlog("on_close Connection closed")
 
-    def on_open_spider(self, ws_spider):
-        sleep(1)
+    # SPIDER
+    def send_spider_test_message(self):
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        text = str('Hello from Alice chatbot ' + str(dt_string))
+        eventlog(text)
         text = {
-            'message': str('alice on_open ' + str(dt_string)),
-            'username': self.name,
-            'robot_id': self.name,
-            'human': self.human_email
+            'message': text,
+            'username': 'Alice',
+            'robot_id': 'Alice_0',
+            'human': 'dante@stringkeeper.com'
         }
-        ws_spider.send(json.dumps(text))
+        self.ws_spider.send(json.dumps(text))
 
-
+    # SPIDER
+    def on_open_spider(self, ws_spider):
+        eventlog('ON OPEN SPIDER TRIGGERED!')
 
     # STRINGKEEPER
     def on_message_stringkeeper(self, ws_stringkeeper, message):
@@ -214,6 +188,7 @@ class ChatBot(threading.Thread):
             elif self.state == 'confirm':
                 if self.message_user_agrees(message):
                     self.send_message_stringkeeper(random("chat/out/starting_search"))
+                    self.send_message_spider(self.command_input, 'search')
                     self.state = ('crawling_search_key_input')
                 else:
                     self.send_message_stringkeeper(random("chat/out/stopping_work"))
@@ -221,9 +196,14 @@ class ChatBot(threading.Thread):
             elif self.state == 'crawling_search_key_input':
                 if self.message_is_stop(message):
                     self.send_message_stringkeeper(random("chat/out/stopping_work"))
+                    self.send_message_spider(self.command_input, 'stop')
                     self.state = 'initialized'
+                elif self.message_is_spider_log(message):
+                    self.send_message_spider('spider_log_update_request', 'spider_log')
 
 
+
+    # STRINGKEEPER
     def send_message_stringkeeper(self, message):
         # eventlog('To: ' + str(self.human_email))
         # eventlog('message: ' + str(message))
@@ -238,6 +218,7 @@ class ChatBot(threading.Thread):
         }
         self.ws_stringkeeper.send(json.dumps(text))
 
+    # STRINGKEEPER
     def send_robot_command_stringkeeper(self, robot_command=None, message=None):
         # eventlog('To: ' + str(self.human_email))
         # eventlog('robot_command: ' + str(robot_command))
@@ -254,23 +235,26 @@ class ChatBot(threading.Thread):
         }
         self.ws_stringkeeper.send(json.dumps(text))
 
+    # STRINGKEEPER
     def robot_command_clear(self, message):
         message = message.lower()
         if message.find('clear') != -1:
             eventlog('sending clear command')
             self.send_robot_command_stringkeeper(robot_command='clear', message='clear')
 
-
+    # STRINGKEEPER
     def send_stringkeeper_manual(self):
         self.send_message_stringkeeper('"clear" removes old text from screen.')
         self.send_message_stringkeeper('"search" define and execute a search.')
         # self.send_message_stringkeeper('Reply with "help" for instructions.')
 
+    # STRINGKEEPER
     def UpdatePreviousMessageBotMessageType(self):
         previous_frame = inspect.currentframe().f_back
         (filename, line_number,  function_name, lines, index) = inspect.getframeinfo(previous_frame)
         self.previous_message_bot_message_type = str(function_name)
 
+    # STRINGKEEPER
     def message_is_salutation(self, message):
         message = message.lower()
         if message.find('hello') != -1: 
@@ -283,7 +267,8 @@ class ChatBot(threading.Thread):
             return True
         else:
             return False
-        
+
+    # STRINGKEEPER
     def message_search(self, message):
         eventlog('message_search')
         message = message.lower()
@@ -323,6 +308,7 @@ class ChatBot(threading.Thread):
         else:
             return False
 
+    # STRINGKEEPER
     def message_user_agrees(self, message):
         message = message.lower()
         if message.find('yes') != -1: 
@@ -346,6 +332,17 @@ class ChatBot(threading.Thread):
         else:
             return False
 
+    # STRINGKEEPER
+    def message_is_stop(self, message):
+        message = message.lower()
+        if message.find('spider_log') != -1: 
+            self.UpdatePreviousMessageBotMessageType()
+            return True
+        else:
+            return False
+
+
+    # STRINGKEEPER
     def message_is_stop(self, message):
         message = message.lower()
         if message.find('stop') != -1: 
@@ -369,17 +366,22 @@ class ChatBot(threading.Thread):
         else:
             return False
 
+    # STRINGKEEPER
     def on_error_stringkeeper(self, ws_stringkeeper, error):
         eventlog("on_error received error as {}".format(error))
 
+    # STRINGKEEPER
     def on_close_stringkeeper(self, ws_stringkeeper):
         eventlog("on_close Connection closed")
 
+    # STRINGKEEPER
     def on_open_stringkeeper(self, ws_stringkeeper):
         self.send_message_stringkeeper('Welcome!')
 
+    # STRINGKEEPER
     def on_data_stringkeeper(self, ws_stringkeeper):
         eventlog("on_data received message as {}".format(message))
+
 
 
     def run_chatbot(self):
@@ -389,6 +391,10 @@ class ChatBot(threading.Thread):
         ws_stringkeeper_thread = threading.Thread(target=self.ws_stringkeeper.run_forever)
         ws_stringkeeper_thread.daemon = True
         ws_stringkeeper_thread.start()
+
+        ws_spider_thread = threading.Thread(target=self.ws_spider.run_forever)
+        ws_spider_thread.daemon = True
+        ws_spider_thread.start()
         # self.ws_stringkeeper.run_forever
         conn_timeout = 5
         try:
@@ -401,28 +407,6 @@ class ChatBot(threading.Thread):
 
         msg_counter = 0
 
-        # while self.alive:
-        #     try:
-        #         while self.ws_stringkeeper.sock.connected and self.alive:
-        #             if not self.alive:
-        #                 eventlog("I'm " + str(self.name) + " and I'm DEAD!")
-        #                 exit()
-        #             else:
-        #                 eventlog(
-        #                 "Name: " + str(self.name) + 
-        #                 " Human: " + str(self.human_email) +
-        #                 " To: " + str(self.To) +
-        #                 " From: " + str(self.From) +
-        #                 " State: " + str(self.state) +
-        #                 " Mood: " + str(self.mood) +
-        #                 " Command: " + str(self.command) +
-        #                 " Command_Input: " + str(self.command_input)
-        #                 )
-        #             sleep(1)
-        #             # self.send_test_message_stringkeeper()
-        #     except:
-        #         eventlog('sleeping for 3 seconds before trying to reconnect...')
-        #         sleep(3)
 
         try:
             while self.ws_stringkeeper.sock.connected and self.alive:
@@ -448,8 +432,10 @@ class ChatBot(threading.Thread):
         self.alive = False
         eventlog('setting keep_running to false')
         self.ws_stringkeeper.keep_running = False
+        self.ws_spider.keep_running = False
         eventlog('about to join')
         ws_stringkeeper_thread.join()
+        ws_spider_thread.join()
         eventlog('run_chatbot ends!')
 
 
