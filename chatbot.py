@@ -76,7 +76,8 @@ class ChatBot(threading.Thread):
     # SPIDER
     def on_message_spider(self, ws_spider, message):
         eventlog('ON MESSAGE SPIDER TRIGGERED!')
-        eventlog("on_message received message as {}".format(message))
+        # eventlog("on_message received message as {}".format(message))
+        eventlog('message: ' + str(message))
         loaded_dict_data = json.loads(message)
         message = loaded_dict_data.get('message', None)
         command = loaded_dict_data.get('command', None)
@@ -89,11 +90,13 @@ class ChatBot(threading.Thread):
 
 
     # SPIDER
-    def send_message_spider(self, command_input, command):
+    def send_message_spider(self, message, command):
         eventlog('ON SEND SPIDER TRIGGERED!')
+        eventlog('message: ' + str(message))
+        eventlog('command: ' + str(command))
         text = {
-            'message': command_input,
-            'spider_command': command,
+            'message': message,
+            'command': command,
             'username': self.name,
             'robot_id': self.name,
             'human': self.human_email
@@ -196,7 +199,10 @@ class ChatBot(threading.Thread):
             elif self.state == 'crawling_search_key_input':
                 if self.message_is_stop(message):
                     self.send_message_stringkeeper(random("chat/out/stopping_work"))
-                    self.send_message_spider(self.command_input, 'stop')
+                    eventlog('STOPPING SEARCH')
+                    eventlog('STOPPING SEARCH')
+                    eventlog('STOPPING SEARCH')
+                    self.send_message_spider(self.command_input, 'stop_search')
                     self.state = 'initialized'
                 elif self.message_is_spider_log(message):
                     self.send_message_spider('spider_log_update_request', 'spider_log')
