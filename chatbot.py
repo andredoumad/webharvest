@@ -52,7 +52,7 @@ class ChatBot(threading.Thread):
                         on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
         else:
             eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
-            self.ws_spider = websocket.WebSocketApp("ws://172.26.5.185:9090/ws",
+            self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
                         on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
                         on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
                         on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),

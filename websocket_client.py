@@ -79,8 +79,8 @@ if __name__ == "__main__":
     ws = websocket.WebSocketApp(
         # "wss://stringkeeper.com/webharvest/",
         # "ws://127.0.0.1:8000/webharvest/",
-        "ws://localhost:9090/ws",
-        # "ws://172.26.5.185:9090/ws", # spider_0
+        # "ws://localhost:9090/ws",
+        "ws://44.233.102.110:9090/ws", # spider_0
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close,
