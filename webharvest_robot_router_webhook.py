@@ -3,7 +3,8 @@ import requests
 from datetime import datetime
 import asyncio
 import logging
-import websockets
+import websocket
+import socket
 logging.basicConfig(level=logging.INFO)
 
 class WebHarvestWorker:
@@ -49,14 +50,39 @@ class WebHarvestWorker:
     #         'chat_message': str(message)
     #     })
 
-worker = WebHarvestWorker('Webharvest_robot_router')
-print(worker.name)
+# worker = WebHarvestWorker('Webharvest_robot_router')
+# print(worker.name)
 
-# worker.initialize()
-now = datetime.now()
-dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-worker.get()
-# worker.chat_message(str('My name is ' + str(worker.name) + '. The time is: ' + dt_string + '.'))
-print('response: ' + str(worker.response))
-print('response json: ' + str(worker.response.json()))
+# # worker.initialize()
+# now = datetime.now()
+# dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+# # worker.get()
+# # worker.chat_message(str('My name is ' + str(worker.name) + '. The time is: ' + dt_string + '.'))
+# print('response: ' + str(worker.response))
+# print('response json: ' + str(worker.response.json()))
 
+
+
+
+
+
+
+
+
+def send_message_to_webharvest(human, message):
+    if str(socket.gethostname()) == "tr3b":
+        api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
+    else:
+        api_url = 'https://stringkeeper.com/webhooks/webharvest/'
+
+    payload = {
+        'user': str(human),
+        'chat_message': str(message)
+    }
+
+    response = requests.post(api_url, data=payload)
+    print('response: ' + str(response))
+    print('response json: ' + str(response.json()))
+
+
+send_message_to_webharvest('dante@stringkeeper.com', 'testing 12345')

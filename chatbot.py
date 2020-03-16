@@ -204,8 +204,8 @@ class ChatBot(threading.Thread):
                     eventlog('STOPPING SEARCH')
                     self.send_message_spider(self.command_input, 'stop_search')
                     self.state = 'initialized'
-                elif self.message_is_spider_log(message):
-                    self.send_message_spider('spider_log_update_request', 'spider_log')
+                # elif self.message_is_spider_log(message):
+                #     self.send_message_spider('spider_log_update_request', 'spider_log')
 
 
 
