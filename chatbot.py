@@ -84,9 +84,14 @@ class ChatBot(threading.Thread):
         robot_id = loaded_dict_data.get('robot_id', None)
         human = loaded_dict_data.get('human', None)
 
+        #THIS IS NOT BEING USED 
 
+        #THIS WHOLE FUNCTION IS NOT BEING USED. BECAUSE -- POST to the VIEW on strinkeeper is sending messages to the chatbot from the spider.
         if command == 'print':
             self.send_message_stringkeeper(message)
+        
+        if command == 'update_state':
+            self.state = message
 
 
     # SPIDER
@@ -141,17 +146,23 @@ class ChatBot(threading.Thread):
         robot_id = loaded_dict_data.get('robot_id', None)
         # eventlog('robot_id: ' + str(robot_id))
 
+
         self.To = None
         self.From = None
         self.To = loaded_dict_data.get('To', None)
         # eventlog('To: ' + str(self.To))
         message = loaded_dict_data.get('message', None)
+        command = loaded_dict_data.get('command', None)
+        if command == 'update_state':
+            self.state = message
+
         # eventlog('message: ' + str(message))
         self.From = loaded_dict_data.get('From', None)
         # eventlog('From: ' + str(self.From))
 
         if self.From != self.name:
             username = loaded_dict_data.get('username', None)
+
             if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
                 eventlog('updating timer for user status')
                 self.last_activity = datetime.now()
@@ -161,6 +172,8 @@ class ChatBot(threading.Thread):
             
             # check for clear screen message
             self.robot_command_clear(message)
+
+
 
             if self.state == 'initialized':
                 eventlog('\n greeting user \n')
@@ -285,16 +298,16 @@ class ChatBot(threading.Thread):
             eventlog('FOUND SEARCH TRIGGER')
             prompt_for_search_keys = True
 
-        elif message.find('search') != -1:
-            search_keys = message.replace('search', '')
-        elif message.find('find') != -1:
-            search_keys = message.replace('search', '')
-        elif message.find('look') != -1:
-            search_keys = message.replace('look', '')
+        # elif message.find('search') != -1:
+        #     search_keys = message.replace('search', '')
+        # elif message.find('find') != -1:
+        #     search_keys = message.replace('search', '')
+        # elif message.find('look') != -1:
+        #     search_keys = message.replace('look', '')
 
         # found search commands with search keys
         if search_keys != None:
-            search_keys = search_keys.replace('for', '')
+            # search_keys = search_keys.replace('for', '')
             self.send_message_stringkeeper(random("chat/out/echo_input") + search_keys)
             self.command_input = str(search_keys)
             self.send_message_stringkeeper(random("chat/out/question/confirm"))
