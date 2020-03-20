@@ -413,14 +413,14 @@ class ChatBot(threading.Thread):
 
         msg_counter = 0
 
-
+        previous_string = ''
         try:
             while self.ws_stringkeeper.sock.connected and self.alive:
                 if not self.alive:
                     eventlog("I'm " + str(self.name) + " and I'm DEAD!")
                     exit()
                 else:
-                    eventlog(
+                    message = str(
                     "Name: " + str(self.name) + 
                     " Human: " + str(self.human_email) +
                     " To: " + str(self.To) +
@@ -430,7 +430,13 @@ class ChatBot(threading.Thread):
                     " Command: " + str(self.command) +
                     " Command_Input: " + str(self.command_input)
                     )
-                sleep(3)
+
+                    if len(previous_string) != len(message):
+                        if previous_string != message:
+                            eventlog(message)
+                            previous_string = message
+
+                    sleep(3)
                 # self.send_test_message_stringkeeper()
         except:
             eventlog('chatbot disconnected!')
