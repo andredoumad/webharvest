@@ -298,12 +298,12 @@ class ChatBot(threading.Thread):
             eventlog('FOUND SEARCH TRIGGER')
             prompt_for_search_keys = True
 
-        # elif message.find('search') != -1:
-        #     search_keys = message.replace('search', '')
-        # elif message.find('find') != -1:
-        #     search_keys = message.replace('search', '')
-        # elif message.find('look') != -1:
-        #     search_keys = message.replace('look', '')
+        elif message.find('search') != -1:
+            search_keys = message
+        elif message.find('find') != -1:
+            search_keys = message
+        elif message.find('look') != -1:
+            search_keys = message
 
         # found search commands with search keys
         if search_keys != None:
