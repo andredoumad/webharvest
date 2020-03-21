@@ -175,11 +175,11 @@ class ChatBot(threading.Thread):
 
 
 
-            if self.state == 'initialized':
-                eventlog('\n greeting user \n')
-                # eventlog(random('salutation'))
-                self.send_message_stringkeeper(random("salutation"))
-                self.state = ('looking_for_command')
+            # if self.state == 'initialized':
+            #     eventlog('\n greeting user \n')
+            #     # eventlog(random('salutation'))
+            #     self.send_message_stringkeeper(random("salutation"))
+            #     self.state = ('looking_for_command')
 
             if self.state == 'looking_for_command' or self.state == 'initialized':
                 eventlog('\n checking for search commands \n')
