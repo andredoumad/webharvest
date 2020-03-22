@@ -316,7 +316,7 @@ class ChatBot(threading.Thread):
 
         # found only search commands
         if prompt_for_search_keys == True:
-            # self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
+            self.send_message_stringkeeper(random("chat/out/question/search/enter_search_keys"))
             self.state = ('enter_search_keys')
             # self.UpdatePreviousMessageBotMessageType()
             triggered = True
