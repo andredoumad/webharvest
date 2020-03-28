@@ -43,21 +43,21 @@ class ChatBot(threading.Thread):
                         on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
-        if str(socket.gethostname()) == "tr3b":
-            eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
-            self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
-                        on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                        on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                        on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
-        else:
-            eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
-            # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
-            self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
-                        on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                        on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                        on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+        # if str(socket.gethostname()) == "tr3b":
+        #     eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
+        #     self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
+        #                 on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+        #                 on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+        #                 on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+        #                 on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+        # else:
+        eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
+        # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
+        self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
+                    on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+                    on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                    on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+                    on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
         
         # self.send_spider_test_message()
 
