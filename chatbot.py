@@ -53,7 +53,7 @@ class ChatBot(threading.Thread):
         else:
             eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
             # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
-            self.ws_spider = websocket.WebSocketApp("ws://192.168.1.11:9090/ws", # citadel
+            self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
                         on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
                         on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
                         on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
