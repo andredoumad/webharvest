@@ -80,7 +80,10 @@ if __name__ == "__main__":
         # "wss://stringkeeper.com/webharvest/",
         # "ws://127.0.0.1:8000/webharvest/",
         # "ws://localhost:9090/ws",
-        "ws://44.233.102.110:9090/ws", # spider_0
+        # "ws://44.233.102.110:9090/ws", # spider_0
+        # "ws://192.168.1.11:9090/ws", # citadel
+        "ws://citadel.blackmesanetwork.com/ws", # citadel
+
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close,
