@@ -27,6 +27,7 @@ class ChatBot(threading.Thread):
         self.From = ''
         self.previous_message_bot_message_type = ''
         self.user_search_keys = ''
+        self.ws_spider = None
 
         if str(socket.gethostname()) == "tr3b":
             eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
@@ -80,7 +81,11 @@ class ChatBot(threading.Thread):
 
 
         if self.bool_spider_connected == False:
-            self.ws_spider = None
+            if self.ws_spider != None:
+                eventlog('closing connection for ws_spider!')                
+                self.ws_spider.close()
+            sleep(1)
+            # self.ws_spider = None
             if str(socket.gethostname()) == "tr3b":
                 eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
                 self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
@@ -157,7 +162,9 @@ class ChatBot(threading.Thread):
             eventlog('EXCEPTION: ' + str(e))
             eventlog('HEY -- send_message_spider failed...')
             self.bool_spider_connected = False
-            self.ConnectToSpider(bool_resend_message=True, message=message, command=command)
+            self.alive = False
+            self.send_message_stringkeeper(random("chat/out/error/looking_for_a_spider"))
+            # self.ConnectToSpider(bool_resend_message=True, message=message, command=command)
 
 
     # SPIDER
@@ -516,6 +523,7 @@ class ChatBot(threading.Thread):
         ws_stringkeeper_thread.join()
         ws_spider_thread.join()
         eventlog('run_chatbot ends!')
+        self.switchboard.remove_robot_from_user(self.human_email)
 
 
 
