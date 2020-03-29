@@ -43,24 +43,68 @@ class ChatBot(threading.Thread):
                         on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
-        if str(socket.gethostname()) == "tr3b":
-            eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
-            self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
-                        on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                        on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                        on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
-        else:
-            eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
-            # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
-            self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
-                        on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                        on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                        on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
-        
-        # self.send_spider_test_message()
 
+        self.bool_spider_connected = False
+        # self.send_spider_test_message()
+        self.ConnectToSpider()
+
+    def ConnectToSpider(self, bool_resend_message=False, message=None, command=None):
+        reconnected = False
+        while reconnected == False:
+            clientSocket = socket.socket()
+            if str(socket.gethostname()) == "tr3b":
+                try:
+                    clientSocket.connect( ( '127.0.0.1', 9090 ) )
+                    eventlog( "re-connection successful" )
+                    # self.bool_spider_connected = True
+                    reconnected = True
+                except Exception as e:
+                    eventlog( "EXCEPTION: " + str(e) )
+                    sleep(2)
+            else:
+                try: 
+                    host_ip = socket.gethostbyname('citadel.blackmesanetwork.com') 
+                except socket.gaierror:
+                    # this means could not resolve the host 
+                    eventlog("there was an error resolving the host")
+                    exit()
+
+                try:
+                    clientSocket.connect( ( host_ip, 9090 ) )
+                    eventlog( "re-connection successful" )  
+                    # self.bool_spider_connected = True
+                    reconnected = True
+                except Exception as e:
+                    eventlog( "EXCEPTION: " + str(e) )
+                    sleep(2)
+
+
+        if self.bool_spider_connected == False:
+            self.ws_spider = None
+            if str(socket.gethostname()) == "tr3b":
+                eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
+                self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
+                            on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+                            on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                            on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+                            on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+            else:
+                eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
+                # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
+                self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
+                # if url == None:
+                    # url = "ws://citadel.blackmesanetwork.com:9090/ws"
+
+                # self.ws_spider = websocket.WebSocketApp(url, # citadel
+                            on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+                            on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                            on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+                            on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+        
+        if bool_resend_message == True:
+            sleep(3)
+            self.send_message_spider(message, command)
+        
 
     def check_for_inactive_user(self):
         eventlog("checking for inactive user")
@@ -107,7 +151,14 @@ class ChatBot(threading.Thread):
             'robot_id': self.name,
             'human': self.human_email
         }
-        self.ws_spider.send(json.dumps(text))
+        try:
+            self.ws_spider.send(json.dumps(text))
+        except Exception as e:
+            eventlog('EXCEPTION: ' + str(e))
+            eventlog('HEY -- send_message_spider failed...')
+            self.bool_spider_connected = False
+            self.ConnectToSpider(bool_resend_message=True, message=message, command=command)
+
 
     # SPIDER
     def on_error_spider(self, ws_spider, error):
@@ -118,6 +169,8 @@ class ChatBot(threading.Thread):
     def on_close_spider(self, ws_spider):
         eventlog('ON CLOSE SPIDER TRIGGERED!')
         eventlog("on_close Connection closed")
+        self.bool_spider_connected = False
+        self.ConnectToSpider()
 
     # SPIDER
     def send_spider_test_message(self):
@@ -136,10 +189,12 @@ class ChatBot(threading.Thread):
     # SPIDER
     def on_open_spider(self, ws_spider):
         eventlog('ON OPEN SPIDER TRIGGERED!')
+        self.bool_spider_connected = True
 
     # STRINGKEEPER
     def on_message_stringkeeper(self, ws_stringkeeper, message):
-
+        # self.ConnectToSpider()
+         
         eventlog("on_message received message as {}".format(message))
         loaded_dict_data = json.loads(message)
         # eventlog('loaded_dict_data: ' + str(loaded_dict_data))
@@ -157,6 +212,9 @@ class ChatBot(threading.Thread):
         if command == 'update_state':
             self.state = message
 
+        # if command == 'connect_to_spider':
+        #     self.ConnectToSpider(message)
+
         # eventlog('message: ' + str(message))
         self.From = loaded_dict_data.get('From', None)
         # eventlog('From: ' + str(self.From))
@@ -167,13 +225,14 @@ class ChatBot(threading.Thread):
             if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
                 eventlog('updating timer for user status')
                 self.last_activity = datetime.now()
-                timer = threading.Timer(3600.0, self.check_for_inactive_user)
+                timer = threading.Timer(60, self.check_for_inactive_user)
                 timer.start()  # after 60 seconds, 'callback' will be called
                 self.bool_timer_is_active = True
             
             # check for clear screen message
             self.robot_command_clear(message)
 
+            # self.robot_command_connect_spider(message)
 
             if self.state == 'looking_for_command' or self.state == 'initialized':
                 eventlog('\n checking for search commands \n')
@@ -398,6 +457,7 @@ class ChatBot(threading.Thread):
 
 
     def run_chatbot(self):
+        self.ConnectToSpider()
         eventlog('hostname: ' + str(socket.gethostname()))
         websocket.enableTrace(True)
 
