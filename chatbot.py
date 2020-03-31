@@ -8,7 +8,7 @@ import logging
 from standalone_tools import *
 
 class ChatBot(threading.Thread):
-    def __init__(self, name, human_email):
+    def __init__(self, name, human_email, message):
         # self._stopevent = threading.Event(  )
         self.sleep_interval = 1.0
         threading.Thread.__init__(self, name=name)
@@ -28,6 +28,7 @@ class ChatBot(threading.Thread):
         self.previous_message_bot_message_type = ''
         self.user_search_keys = ''
         self.ws_spider = None
+        self.initial_message_from_user = message
 
         if str(socket.gethostname()) == "tr3b":
             eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
@@ -39,7 +40,7 @@ class ChatBot(threading.Thread):
         else:
             eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
             self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
-                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
+                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
                         on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
                         on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
@@ -232,7 +233,7 @@ class ChatBot(threading.Thread):
             if str(username) == str(self.human_email) or self.bool_timer_is_active == False:
                 eventlog('updating timer for user status')
                 self.last_activity = datetime.now()
-                timer = threading.Timer(60, self.check_for_inactive_user)
+                timer = threading.Timer(900, self.check_for_inactive_user)
                 timer.start()  # after 60 seconds, 'callback' will be called
                 self.bool_timer_is_active = True
             
@@ -456,6 +457,7 @@ class ChatBot(threading.Thread):
     # STRINGKEEPER
     def on_open_stringkeeper(self, ws_stringkeeper):
         self.send_message_stringkeeper('Welcome!')
+        self.on_message_stringkeeper(self.ws_stringkeeper, self.initial_message_from_user)
 
     # STRINGKEEPER
     def on_data_stringkeeper(self, ws_stringkeeper):

@@ -28,6 +28,7 @@ class WebHarvest:
 
     def on_message(self, ws, message):
 
+        dictionary_message = message
         loaded_dict_data = json.loads(message)
         robot_command = loaded_dict_data.get('robot_command', None)
 
@@ -54,7 +55,9 @@ class WebHarvest:
                 # if value == None:
                 if self.user_robot_assignment_dict.get(str(key)) == None:
                     eventlog(str('user: ' + str(key) + ' is active and needs a robot!'))
-                    self.assign_robot_to_user(str(key))
+                    message = loaded_dict_data.get('message', None)
+                    eventlog('message: ' + str(message))
+                    self.assign_robot_to_user(str(key), dictionary_message)
         
         elif robot_command == 'update_user_status':
             eventlog('triggered updated_user_status!')
@@ -65,7 +68,7 @@ class WebHarvest:
             
             if self.user_robot_assignment_dict.get(str(human)) == None:
                 eventlog(str('user: ' + str(human) + ' is active and needs a robot!'))
-                self.assign_robot_to_user(str(human))
+                self.assign_robot_to_user(str(human), dictionary_message)
 
     def on_error(self, ws, error):
         print("on_error received error as {}".format(error))
@@ -92,14 +95,14 @@ class WebHarvest:
         }
         ws.send(json.dumps(text))
 
-    def assign_robot_to_user(self, human):
+    def assign_robot_to_user(self, human, message):
         eventlog('assign_robot_to_user....')
         thread = self.user_robot_assignment_dict.get(human)
         eventlog('thread: ' + str(thread))
         if thread == None:
             eventlog('human not found...')
-            robot = ChatBot('Alice', str(human))
-            chatbot_thread = threading.Thread(target=robot.run_chatbot)    
+            robot = ChatBot('Alice', str(human), message)
+            chatbot_thread = threading.Thread(target=robot.run_chatbot)
             chatbot_thread.daemon = True
             chatbot_thread.start()
             robot.thread = chatbot_thread
