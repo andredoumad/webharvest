@@ -238,7 +238,7 @@ class ChatBot(threading.Thread):
                 self.bool_timer_is_active = True
             
             # check for clear screen message
-            self.robot_command_clear(message)
+            # self.robot_command_clear(message)
 
             # self.robot_command_connect_spider(message)
 
@@ -273,8 +273,6 @@ class ChatBot(threading.Thread):
             elif self.state == 'crawling_search_key_input':
                 if self.message_is_stop(message):
                     self.send_message_stringkeeper(random("chat/out/stopping_work"))
-                    eventlog('STOPPING SEARCH')
-                    eventlog('STOPPING SEARCH')
                     eventlog('STOPPING SEARCH')
                     self.send_message_spider(self.command_input, 'stop_search')
                     self.state = 'initialized'
