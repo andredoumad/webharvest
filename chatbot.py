@@ -250,7 +250,7 @@ class ChatBot(threading.Thread):
                     pass
                 elif self.message_is_salutation(message):
                     self.send_message_stringkeeper(random("salutation"))
-                else:
+                elif len(message) > 1:
                     self.message_search('search ' + message)
                     
                     
@@ -360,7 +360,7 @@ class ChatBot(threading.Thread):
             prompt_for_search_keys = True
 
         elif message.find('search') != -1:
-            search_keys = message
+            search_keys = message.replace('search', '')
         elif message.find('find') != -1:
             search_keys = message
         elif message.find('look') != -1:

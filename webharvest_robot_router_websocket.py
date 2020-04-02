@@ -99,6 +99,8 @@ class WebHarvest:
         eventlog('assign_robot_to_user....')
         thread = self.user_robot_assignment_dict.get(human)
         eventlog('thread: ' + str(thread))
+
+                
         if thread == None:
             eventlog('human not found...')
             robot = ChatBot('Alice', str(human), message)
