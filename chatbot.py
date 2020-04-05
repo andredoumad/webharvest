@@ -238,7 +238,7 @@ class ChatBot(threading.Thread):
                 self.bool_timer_is_active = True
             
             # check for clear screen message
-            # self.robot_command_clear(message)
+            self.robot_command_clear(message)
 
             # self.robot_command_connect_spider(message)
 
@@ -320,11 +320,6 @@ class ChatBot(threading.Thread):
             eventlog('sending clear command')
             self.send_robot_command_stringkeeper(robot_command='clear', message='clear')
 
-    # STRINGKEEPER
-    def send_stringkeeper_manual(self):
-        self.send_message_stringkeeper('"clear" removes old text from screen.')
-        self.send_message_stringkeeper('"search" define and execute a search.')
-        # self.send_message_stringkeeper('Reply with "help" for instructions.')
 
     # STRINGKEEPER
     def UpdatePreviousMessageBotMessageType(self):
