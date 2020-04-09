@@ -126,23 +126,24 @@ class ChatBot(threading.Thread):
 
     # SPIDER
     def on_message_spider(self, ws_spider, message):
-        eventlog('ON MESSAGE SPIDER TRIGGERED!')
-        # eventlog("on_message received message as {}".format(message))
-        eventlog('message: ' + str(message))
-        loaded_dict_data = json.loads(message)
-        message = loaded_dict_data.get('message', None)
-        command = loaded_dict_data.get('command', None)
-        robot_id = loaded_dict_data.get('robot_id', None)
-        human = loaded_dict_data.get('human', None)
+        pass
+        # eventlog('ON MESSAGE SPIDER TRIGGERED!')
+        # # eventlog("on_message received message as {}".format(message))
+        # eventlog('message: ' + str(message))
+        # loaded_dict_data = json.loads(message)
+        # message = loaded_dict_data.get('message', None)
+        # command = loaded_dict_data.get('command', None)
+        # robot_id = loaded_dict_data.get('robot_id', None)
+        # human = loaded_dict_data.get('human', None)
 
-        #THIS IS NOT BEING USED 
+        # #THIS IS NOT BEING USED 
 
-        #THIS WHOLE FUNCTION IS NOT BEING USED. BECAUSE -- POST to the VIEW on strinkeeper is sending messages to the chatbot from the spider.
-        if command == 'print':
-            self.send_message_stringkeeper(message)
+        # #THIS WHOLE FUNCTION IS NOT BEING USED. BECAUSE -- POST to the VIEW on strinkeeper is sending messages to the chatbot from the spider.
+        # if command == 'print':
+        #     self.send_message_stringkeeper(message)
         
-        if command == 'update_state':
-            self.state = message
+        # if command == 'update_state':
+        #     self.state = message
 
 
     # SPIDER
@@ -265,6 +266,7 @@ class ChatBot(threading.Thread):
             elif self.state == 'confirm':
                 if self.message_user_agrees(message):
                     self.send_message_stringkeeper(random("chat/out/starting_search"))
+                    # self.send_message_spider('clear', 'clear')
                     self.send_message_spider(self.command_input, 'search')
                     self.state = ('crawling_search_key_input')
                 else:
@@ -282,7 +284,7 @@ class ChatBot(threading.Thread):
 
 
     # STRINGKEEPER
-    def send_message_stringkeeper(self, message):
+    def send_message_stringkeeper(self, message, command='print'):
         # eventlog('To: ' + str(self.human_email))
         # eventlog('message: ' + str(message))
 
@@ -292,7 +294,8 @@ class ChatBot(threading.Thread):
             'message': message,
             'username': self.name,
             'robot_id': self.name,
-            'human': self.human_email
+            'human': self.human_email,
+            'command': command
         }
         self.ws_stringkeeper.send(json.dumps(text))
 
@@ -316,7 +319,9 @@ class ChatBot(threading.Thread):
     # STRINGKEEPER
     def robot_command_clear(self, message):
         message = message.lower()
-        if message.find('clear') != -1:
+        if message.find('alice clear'):
+            self.send_message_spider('clear', 'clear')
+        elif message.find('clear') != -1:
             eventlog('sending clear command')
             self.send_robot_command_stringkeeper(robot_command='clear', message='clear')
 
