@@ -70,11 +70,11 @@ class WebHarvestWorker:
 
 
 def send_message_to_webharvest(human, message):
-    if str(socket.gethostname()) == "tr3b":
-        api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
-    else:
+    if str(socket.gethostname()) == "www.stringkeeper.com":
         api_url = 'https://stringkeeper.com/webhooks/webharvest/'
-
+    else:
+        api_url = 'http://127.0.0.1:8000/webhooks/webharvest/'
+        
     payload = {
         'user': str(human),
         'chat_message': str(message)
