@@ -133,8 +133,9 @@ class ChatBot(threading.Thread):
 
     # SPIDER
     def on_message_spider(self, ws_spider, message):
-        pass
-        # eventlog('ON MESSAGE SPIDER TRIGGERED!')
+        
+        # pass
+        eventlog('ON MESSAGE SPIDER TRIGGERED!')
         # # eventlog("on_message received message as {}".format(message))
         # eventlog('message: ' + str(message))
         # loaded_dict_data = json.loads(message)
