@@ -12,7 +12,9 @@ from chatbot import ChatBot
 class WebHarvest:
     def __init__(self, name):
         self.name = name
-        if str(socket.gethostname()) == "www.stringkeeper.com":
+        self.target_url = ''
+        if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
+            self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws,msg: self.on_message(ws, msg),
                         on_error   = lambda ws,msg: self.on_error(ws, msg),
@@ -20,6 +22,7 @@ class WebHarvest:
                         on_open    = lambda ws:     self.on_open(ws))
 
         else:
+            self.target_url = 'ws://127.0.0.1:8000/webharvest/'
             self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
                         on_message = lambda ws,msg: self.on_message(ws, msg),
                         on_error   = lambda ws,msg: self.on_error(ws, msg),
@@ -74,12 +77,15 @@ class WebHarvest:
                 self.assign_robot_to_user(str(human), dictionary_message)
 
     def on_error(self, ws, error):
+        print('self.target_url: ' + str(self.target_url))
         print("on_error received error as {}".format(error))
 
     def on_close(self, ws):
+        print('self.target_url: ' + str(self.target_url))
         print("on_close Connection closed")
 
     def on_open(self, ws):
+        print('self.target_url: ' + str(self.target_url))
         sleep(3)
 
         text = {
