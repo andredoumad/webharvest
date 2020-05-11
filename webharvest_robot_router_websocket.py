@@ -13,7 +13,7 @@ class WebHarvest:
     def __init__(self, name):
         self.name = name
         self.target_url = ''
-        if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
+        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
             self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws,msg: self.on_message(ws, msg),
@@ -178,7 +178,7 @@ def run_webharvest():
         while harvest.ws.sock.connected:
             sleep(5)
             if initialized_server == False:
-                if str(socket.gethostname()) == "www.stringkeeper.com":
+                if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
                     harvest.set_all_users_to_inactive()
                 harvest.subscribe_to_user_updates()
                 initialized_server = True

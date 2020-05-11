@@ -31,7 +31,7 @@ class ChatBot(threading.Thread):
         self.initial_message_from_user = message
         self.target_url = ''
 
-        if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
+        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
             eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
             self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
@@ -58,7 +58,7 @@ class ChatBot(threading.Thread):
         reconnected = False
         while reconnected == False:
             clientSocket = socket.socket()
-            if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
+            if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
                 try: 
                     host_ip = socket.gethostbyname('citadel.blackmesanetwork.com') 
                 except socket.gaierror:
@@ -89,7 +89,7 @@ class ChatBot(threading.Thread):
                 self.ws_spider.close()
             sleep(1)
             # self.ws_spider = None
-            if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
+            if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
 
 
                 eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
