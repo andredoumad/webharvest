@@ -29,15 +29,17 @@ class ChatBot(threading.Thread):
         self.user_search_keys = ''
         self.ws_spider = None
         self.initial_message_from_user = message
-
-        if str(socket.gethostname()) == "www.stringkeeper.com":
+        self.target_url = ''
+        if str(socket.gethostname()) == "www.stringkeeper.com" or str(socket.gethostname()) == "citadel" or str(socket.gethostname()) == "tr3b":
             eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
+            self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
                         on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
                         on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
                         on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
         else:
+            self.target_url = 'ws://127.0.0.1:8000/webharvest/'
             eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
             self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
                         on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
