@@ -417,14 +417,14 @@ class ChatBot(threading.Thread):
         else:
             return False
 
-    # STRINGKEEPER
-    def message_is_stop(self, message):
-        message = message.lower()
-        if message.find('spider_log') != -1: 
-            self.UpdatePreviousMessageBotMessageType()
-            return True
-        else:
-            return False
+    # # STRINGKEEPER
+    # def message_is_stop(self, message):
+    #     message = message.lower()
+    #     if message.find('spider_log') != -1: 
+    #         self.UpdatePreviousMessageBotMessageType()
+    #         return True
+    #     else:
+    #         return False
 
 
     # STRINGKEEPER
@@ -464,9 +464,9 @@ class ChatBot(threading.Thread):
         self.send_message_stringkeeper('Welcome!')
         self.on_message_stringkeeper(self.ws_stringkeeper, self.initial_message_from_user)
 
-    # STRINGKEEPER
-    def on_data_stringkeeper(self, ws_stringkeeper):
-        eventlog("on_data received message as {}".format(message))
+    # # STRINGKEEPER
+    # def on_data_stringkeeper(self, ws_stringkeeper):
+    #     eventlog("on_data received message as {}".format(message))
 
 
 

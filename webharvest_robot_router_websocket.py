@@ -94,8 +94,8 @@ class WebHarvest:
         }
         ws.send(json.dumps(text))
 
-    def on_data(self, ws):
-        print("on_data received message as {}".format(message))
+    # def on_data(self, ws):
+    #     print("on_data received message as {}".format(message))
 
     def get_update(self, ws):
         text = {
