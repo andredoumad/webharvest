@@ -51,8 +51,9 @@ class ChatBot(threading.Thread):
 
 
         self.bool_spider_connected = False
-        # self.send_spider_test_message()
+        
         self.ConnectToSpider()
+
 
     def ConnectToSpider(self, bool_resend_message=False, message=None, command=None):
         reconnected = False
@@ -176,6 +177,7 @@ class ChatBot(threading.Thread):
             self.send_message_stringkeeper(random("chat/out/error/looking_for_a_spider"))
             # self.ConnectToSpider(bool_resend_message=True, message=message, command=command)
 
+    # def send_spider_test_message
 
     # SPIDER
     def on_error_spider(self, ws_spider, error):
@@ -304,6 +306,24 @@ class ChatBot(threading.Thread):
             'robot_id': self.name,
             'human': self.human_email,
             'command': command
+        }
+        self.ws_stringkeeper.send(json.dumps(text))
+
+    # STRINGKEEPER
+    def send_test_message_stringkeeper(self):
+        # eventlog('To: ' + str(self.human_email))
+        # eventlog('message: ' + str(message))
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        message = str('Hello from Alice chatbot ' + str(dt_string))
+        text = {
+            'To': self.human_email,
+            'From': self.name,
+            'message': message,
+            'username': self.name,
+            'robot_id': self.name,
+            'human': self.human_email,
+            'command': 'print'
         }
         self.ws_stringkeeper.send(json.dumps(text))
 
@@ -518,8 +538,10 @@ class ChatBot(threading.Thread):
                             eventlog(message)
                             previous_string = message
 
-                    sleep(3)
-                # self.send_test_message_stringkeeper()
+
+                self.send_test_message_stringkeeper()
+                self.send_spider_test_message()
+                sleep(5)
         except:
             eventlog('chatbot disconnected!')
         
