@@ -539,8 +539,8 @@ class ChatBot(threading.Thread):
                             previous_string = message
 
 
-                self.send_test_message_stringkeeper()
-                self.send_spider_test_message()
+                # self.send_test_message_stringkeeper()
+                # self.send_spider_test_message()
                 sleep(5)
         except:
             eventlog('chatbot disconnected!')
