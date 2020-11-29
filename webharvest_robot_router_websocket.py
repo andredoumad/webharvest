@@ -77,15 +77,15 @@ class WebHarvest:
                 self.assign_robot_to_user(str(human), dictionary_message)
 
     def on_error(self, ws, error):
-        print('self.target_url: ' + str(self.target_url))
-        print("on_error received error as {}".format(error))
+        eventlog('self.target_url: '.format(self.target_url))
+        eventlog("on_error received error as {}".format(error))
 
     def on_close(self, ws):
-        print('self.target_url: ' + str(self.target_url))
-        print("on_close Connection closed")
+        eventlog('self.target_url: {}'.format(self.target_url))
+        eventlog("on_close Connection closed")
 
     def on_open(self, ws):
-        print('self.target_url: ' + str(self.target_url))
+        eventlog('self.target_url: '.format(self.target_url))
         sleep(3)
 
         text = {
@@ -196,7 +196,8 @@ if __name__ == "__main__":
     while True:
         try:
             run_webharvest()
-        except:
+        except Exception as e:
+            eventlog("Exception: {}".format(e))
             eventlog('trying to connect...')
             sleep(5)
 
