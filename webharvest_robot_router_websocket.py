@@ -15,7 +15,7 @@ class WebHarvest:
         self.target_url = ''
         if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
             # self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.target_url = 'ws://stringkeeper.com/webharvest/'
+            self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws,msg: self.on_message(ws, msg),
                         on_error   = lambda ws,msg: self.on_error(ws, msg),

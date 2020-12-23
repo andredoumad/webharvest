@@ -34,7 +34,7 @@ class ChatBot(threading.Thread):
         if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
             eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
             # self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.target_url = 'ws://stringkeeper.com/webharvest/'
+            self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
                         on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
                         on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
