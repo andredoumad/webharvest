@@ -13,29 +13,36 @@ class WebHarvest:
     def __init__(self, name):
         self.name = name
         self.target_url = ''
-        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-            # self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
-                        on_message = lambda ws,msg: self.on_message(ws, msg),
-                        on_error   = lambda ws,msg: self.on_error(ws, msg),
-                        on_close   = lambda ws:     self.on_close(ws),
-                        on_open    = lambda ws:     self.on_open(ws))
+        # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+        #     # self.target_url = 'wss://stringkeeper.com/webharvest/'
+        #     self.target_url = 'wss://stringkeeper.com/webharvest/'
+        #     self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
+        #                 on_message = lambda ws,msg: self.on_message(ws, msg),
+        #                 on_error   = lambda ws,msg: self.on_error(ws, msg),
+        #                 on_close   = lambda ws:     self.on_close(ws),
+        #                 on_open    = lambda ws:     self.on_open(ws))
 
-        else:
-            self.target_url = 'ws://127.0.0.1:8000/webharvest/'
-            self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
-                        on_message = lambda ws,msg: self.on_message(ws, msg),
-                        on_error   = lambda ws,msg: self.on_error(ws, msg),
-                        on_close   = lambda ws:     self.on_close(ws),
-                        on_open    = lambda ws:     self.on_open(ws))
+        # else:
+        #     self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        #     self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+        #                 on_message = lambda ws,msg: self.on_message(ws, msg),
+        #                 on_error   = lambda ws,msg: self.on_error(ws, msg),
+        #                 on_close   = lambda ws:     self.on_close(ws),
+        #                 on_open    = lambda ws:     self.on_open(ws))
 
-        # self.target_url = 'ws://127.0.0.1:8000/webharvest/'
-        # self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+        # self.target_url = 'wss://stringkeeper.com/webharvest/'
+        # self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
         #             on_message = lambda ws,msg: self.on_message(ws, msg),
         #             on_error   = lambda ws,msg: self.on_error(ws, msg),
         #             on_close   = lambda ws:     self.on_close(ws),
         #             on_open    = lambda ws:     self.on_open(ws))
+
+        self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+                    on_message = lambda ws,msg: self.on_message(ws, msg),
+                    on_error   = lambda ws,msg: self.on_error(ws, msg),
+                    on_close   = lambda ws:     self.on_close(ws),
+                    on_open    = lambda ws:     self.on_open(ws))
 
 
         self.user_robot_assignment_dict = {}
@@ -85,7 +92,7 @@ class WebHarvest:
                 self.assign_robot_to_user(str(human), dictionary_message)
 
     def on_error(self, ws, error):
-        eventlog('self.target_url: '.format(self.target_url))
+        eventlog(f"self.target_url: {self.target_url}")
         eventlog("on_error received error as {}".format(error))
 
     def on_close(self, ws):
@@ -186,8 +193,8 @@ def run_webharvest():
         while harvest.ws.sock.connected:
             sleep(5)
             if initialized_server == False:
-                if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-                    harvest.set_all_users_to_inactive()
+                # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+                harvest.set_all_users_to_inactive()
                 harvest.subscribe_to_user_updates()
                 initialized_server = True
             # harvest.get_update(harvest.ws)

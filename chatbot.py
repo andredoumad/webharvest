@@ -31,31 +31,39 @@ class ChatBot(threading.Thread):
         self.initial_message_from_user = message
         self.target_url = ''
 
-        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-            eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
-            # self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.target_url = 'wss://stringkeeper.com/webharvest/'
-            self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
-                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
-                        on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-                        on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-                        on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
-        else:
-            self.target_url = 'ws://127.0.0.1:8000/webharvest/'
-            eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
-            self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
-                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
-                        on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-                        on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-                        on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
+        # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+        #     eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
+        #     # self.target_url = 'wss://stringkeeper.com/webharvest/'
+        #     self.target_url = 'wss://stringkeeper.com/webharvest/'
+        #     self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
+        #                 on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
+        #                 on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
+        #                 on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
+        #                 on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
+        # else:
+        #     self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        #     eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
+        #     self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+        #                 on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
+        #                 on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
+        #                 on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
+        #                 on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
-        # self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        # self.target_url = 'wss://stringkeeper.com/webharvest/'
         # eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
-        # self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+        # self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
         #             on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
         #             on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
         #             on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
         #             on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
+
+        self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
+        self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+                    on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
+                    on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
+                    on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
+                    on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
         self.bool_spider_connected = False
         
@@ -66,30 +74,40 @@ class ChatBot(threading.Thread):
         reconnected = False
         while reconnected == False:
             clientSocket = socket.socket()
-            if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-                try: 
-                    host_ip = socket.gethostbyname('citadel.blackmesanetwork.com') 
-                except socket.gaierror:
-                    # this means could not resolve the host 
-                    eventlog("there was an error resolving the host")
-                    exit()
-                try:
-                    clientSocket.connect( ( host_ip, 9090 ) )
-                    eventlog( "re-connection successful" )  
-                    # self.bool_spider_connected = True
-                    reconnected = True
-                except Exception as e:
-                    eventlog( "EXCEPTION: " + str(e) )
-                    sleep(2)
-            else:
-                try:
-                    clientSocket.connect( ( '127.0.0.1', 9090 ) )
-                    eventlog( "re-connection successful" )
-                    # self.bool_spider_connected = True
-                    reconnected = True
-                except Exception as e:
-                    eventlog( "EXCEPTION: " + str(e) )
-                    sleep(2)
+            # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+            #     try: 
+            #         host_ip = socket.gethostbyname('citadel.blackmesanetwork.com') 
+            #     except socket.gaierror:
+            #         # this means could not resolve the host 
+            #         eventlog("there was an error resolving the host")
+            #         exit()
+            #     try:
+            #         clientSocket.connect( ( host_ip, 9090 ) )
+            #         eventlog( "re-connection successful" )  
+            #         # self.bool_spider_connected = True
+            #         reconnected = True
+            #     except Exception as e:
+            #         eventlog( "EXCEPTION: " + str(e) )
+            #         sleep(2)
+            # else:
+            #     try:
+            #         clientSocket.connect( ( '127.0.0.1', 9090 ) )
+            #         eventlog( "re-connection successful" )
+            #         # self.bool_spider_connected = True
+            #         reconnected = True
+            #     except Exception as e:
+            #         eventlog( "EXCEPTION: " + str(e) )
+            #         sleep(2)
+
+            try:
+                clientSocket.connect( ( '127.0.0.1', 9090 ) )
+                eventlog( "re-connection successful" )
+                # self.bool_spider_connected = True
+                reconnected = True
+            except Exception as e:
+                eventlog( "EXCEPTION: " + str(e) )
+                sleep(2)
+
 
         if self.bool_spider_connected == False:
             if self.ws_spider != None:
@@ -97,30 +115,35 @@ class ChatBot(threading.Thread):
                 self.ws_spider.close()
             sleep(1)
             # self.ws_spider = None
-            if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+            # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
 
 
-                eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
-                # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
-                self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
-                # if url == None:
-                    # url = "ws://citadel.blackmesanetwork.com:9090/ws"
+            #     eventlog('SETTING UP CONNECTION TO REMOTE SPIDER!')
+            #     # self.ws_spider = websocket.WebSocketApp("ws://44.233.102.110:9090/ws", # spider_0
+            #     self.ws_spider = websocket.WebSocketApp("ws://citadel.blackmesanetwork.com:9090/ws", # citadel
+            #     # if url == None:
+            #         # url = "ws://citadel.blackmesanetwork.com:9090/ws"
 
-                # self.ws_spider = websocket.WebSocketApp(url, # citadel
-                            on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                            on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                            on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                            on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+            #     # self.ws_spider = websocket.WebSocketApp(url, # citadel
+            #                 on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+            #                 on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+            #                 on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+            #                 on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
 
-            else:
+            # else:
 
-                eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
-                self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
-                            on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
-                            on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
-                            on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
-                            on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
-
+                # eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
+                # self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
+                #             on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+                #             on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                #             on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+                #             on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
+            eventlog('SETTING UP CONNECTION TO LOCAL SPIDER!')
+            self.ws_spider = websocket.WebSocketApp("ws://localhost:9090/ws",
+                        on_message = lambda ws_spider,msg: self.on_message_spider(ws_spider, msg),
+                        on_error   = lambda ws_spider,msg: self.on_error_spider(ws_spider, msg),
+                        on_close   = lambda ws_spider:     self.on_close_spider(ws_spider),
+                        on_open    = lambda ws_spider:     self.on_open_spider(ws_spider))
         
         if bool_resend_message == True:
             sleep(3)
