@@ -37,8 +37,8 @@ class WebHarvest:
         #             on_close   = lambda ws:     self.on_close(ws),
         #             on_open    = lambda ws:     self.on_open(ws))
 
-        self.target_url = 'wss://127.0.0.1:8000/webharvest/'
-        self.ws = websocket.WebSocketApp("wss://127.0.0.1:8000/webharvest/",
+        self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+        self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
                     on_message = lambda ws,msg: self.on_message(ws, msg),
                     on_error   = lambda ws,msg: self.on_error(ws, msg),
                     on_close   = lambda ws:     self.on_close(ws),
