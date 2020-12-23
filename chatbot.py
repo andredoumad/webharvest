@@ -31,39 +31,24 @@ class ChatBot(threading.Thread):
         self.initial_message_from_user = message
         self.target_url = ''
 
-        # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-        #     eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
-        #     # self.target_url = 'wss://stringkeeper.com/webharvest/'
-        #     self.target_url = 'wss://stringkeeper.com/webharvest/'
-        #     self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
-        #                 on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
-        #                 on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-        #                 on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-        #                 on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
-        # else:
-        #     self.target_url = 'ws://127.0.0.1:8000/webharvest/'
-        #     eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
-        #     self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
-        #                 on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
-        #                 on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-        #                 on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-        #                 on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
+        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+            eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
+            # self.target_url = 'wss://stringkeeper.com/webharvest/'
+            self.target_url = 'wss://stringkeeper.com/webharvest/'
+            self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
+                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper,msg),
+                        on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
+                        on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
+                        on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
+        else:
+            self.target_url = 'ws://127.0.0.1:8000/webharvest/'
+            eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
+            self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
+                        on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
+                        on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
+                        on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
+                        on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
-        # self.target_url = 'wss://stringkeeper.com/webharvest/'
-        # eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
-        # self.ws_stringkeeper = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
-        #             on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
-        #             on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-        #             on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-        #             on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
-
-        self.target_url = 'ws://127.0.0.1:8000/webharvest/'
-        eventlog('SETTING UP CONNECTION TO LOCAL WEBSERVER!')
-        self.ws_stringkeeper = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
-                    on_message = lambda ws_stringkeeper,msg: self.on_message_stringkeeper(ws_stringkeeper, msg),
-                    on_error   = lambda ws_stringkeeper,msg: self.on_error_stringkeeper(ws_stringkeeper, msg),
-                    on_close   = lambda ws_stringkeeper:     self.on_close_stringkeeper(ws_stringkeeper),
-                    on_open    = lambda ws_stringkeeper:     self.on_open_stringkeeper(ws_stringkeeper))
 
         self.bool_spider_connected = False
         
