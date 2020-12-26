@@ -29,8 +29,6 @@ class WebHarvest:
                         on_close   = lambda ws:     self.on_close(ws),
                         on_open    = lambda ws:     self.on_open(ws))
 
-
-
         self.user_robot_assignment_dict = {}
 
     def on_message(self, ws, message):
