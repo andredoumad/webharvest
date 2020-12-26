@@ -13,7 +13,7 @@ class WebHarvest:
     def __init__(self, name):
         self.name = name
         self.target_url = ''
-        if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
+        if str(socket.gethostname()) == "tr3b": # connect from tr3b to stringkeeper
             # self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",
@@ -21,13 +21,15 @@ class WebHarvest:
                         on_error   = lambda ws,msg: self.on_error(ws, msg),
                         on_close   = lambda ws:     self.on_close(ws),
                         on_open    = lambda ws:     self.on_open(ws))
-        else:
+        else: # connect locally
             self.target_url = 'ws://127.0.0.1:8000/webharvest/'
             self.ws = websocket.WebSocketApp("ws://127.0.0.1:8000/webharvest/",
                         on_message = lambda ws,msg: self.on_message(ws, msg),
                         on_error   = lambda ws,msg: self.on_error(ws, msg),
                         on_close   = lambda ws:     self.on_close(ws),
                         on_open    = lambda ws:     self.on_open(ws))
+
+
 
         self.user_robot_assignment_dict = {}
 
@@ -91,6 +93,7 @@ class WebHarvest:
             'robot_id': 'webharvest_robot_router',
 
         }
+        print(f"sending: {json.dumps(text)}")
         ws.send(json.dumps(text))
 
     # def on_data(self, ws):
@@ -101,6 +104,7 @@ class WebHarvest:
             'robot_id': 'webharvest_robot_router',
             'robot_command': 'get_active_and_inactive_users',
         }
+        print(f"sending: {json.dumps(text)}")
         ws.send(json.dumps(text))
 
     def assign_robot_to_user(self, human, message):
@@ -143,6 +147,7 @@ class WebHarvest:
             'robot_id': 'webharvest_robot_router',
             'robot_command': 'set_all_users_to_inactive'
         }
+        print(f"sending: {json.dumps(text)}")
         self.ws.send(json.dumps(text))
 
     def subscribe_to_user_updates(self):
@@ -151,6 +156,7 @@ class WebHarvest:
             'robot_id': 'webharvest_robot_router',
             'robot_command': 'subscribe_to_user_status_updates'
         }
+        print(f"sending: {json.dumps(text)}")
         self.ws.send(json.dumps(text))
 
 
@@ -177,8 +183,8 @@ def run_webharvest():
         while harvest.ws.sock.connected:
             sleep(5)
             if initialized_server == False:
-                # if str(socket.gethostname()) != "tr3b" or str(socket.gethostname()) == "gman":
-                harvest.set_all_users_to_inactive()
+                if str(socket.gethostname()) != "tr3b":
+                    harvest.set_all_users_to_inactive()
                 harvest.subscribe_to_user_updates()
                 initialized_server = True
             # harvest.get_update(harvest.ws)
