@@ -13,7 +13,7 @@ class WebHarvest:
     def __init__(self, name):
         self.name = name
         self.target_url = ''
-        if str(socket.gethostname()) == "tr3b": # connect from tr3b to stringkeeper
+        if str(socket.gethostname()) != "tr3b": # connect from tr3b to stringkeeper
             # self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.ws = websocket.WebSocketApp("wss://stringkeeper.com/webharvest/",

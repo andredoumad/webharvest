@@ -31,7 +31,7 @@ class ChatBot(threading.Thread):
         self.initial_message_from_user = message
         self.target_url = ''
 
-        if str(socket.gethostname()) == "tr3b": # test from tr3b to stringkeeper
+        if str(socket.gethostname()) != "tr3b": # test from tr3b to stringkeeper
             eventlog('SETTING UP CONNECTION TO REMOTE WEBSERVER!')
             # self.target_url = 'wss://stringkeeper.com/webharvest/'
             self.target_url = 'wss://stringkeeper.com/webharvest/'
